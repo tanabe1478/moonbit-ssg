@@ -39,14 +39,15 @@
 - index、section、item、page、tag HTML生成
 - `foldersAndIndexFiles` / `standAloneFiles`
 - tag HTMLの無効化
+- configurable RSS feed、section選択、item predicate
+- RSS GUID、link、title/body prefix・suffix override
+- 複数section・page対応sitemapとexcluded path
 
 ### 未実装
 
 - Predicate、item/page mutation、汎用sort step
 - optional/group/custom stepとplugin installer
-- configurable RSS feedとitem predicate
 - podcast feed
-- 汎用sitemapとexcluded paths
 - 任意file/folder copy stepとtheme resource set
 - Foundation theme
 - favicon、audio player、hosted/YouTube/Vimeo video player component

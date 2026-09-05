@@ -17,6 +17,8 @@ pub fn build_published_content(String, Array[PublishSectionSource], Array[Publis
 
 pub fn build_site_content(String, String, Array[PostSource]) -> SiteContent
 
+pub fn default_publish_rss_configuration() -> PublishRSSConfiguration
+
 pub fn generate_publish_html(String, PublishedContent, PublishHTMLFactory, file_mode? : HTMLFileMode, tag_base_path? : String) -> Unit raise @fs.IOError
 
 pub fn load_published_content(String, Array[String]) -> PublishedContent raise @fs.IOError
@@ -30,6 +32,10 @@ pub fn render_index_page(SiteConfig, SiteContent) -> String
 pub fn render_markdown(String) -> String
 
 pub fn render_post_page(SiteConfig, Post) -> String
+
+pub fn render_publish_rss_feed(PublishSiteConfig, PublishedContent, Array[String], BuildDate, configuration? : PublishRSSConfiguration, item_predicate? : (PublishItem) -> Bool) -> String
+
+pub fn render_publish_sitemap(PublishSiteConfig, PublishedContent, BuildDate, excluded_paths? : Array[String]) -> String
 
 pub fn render_rss_feed(SiteConfig, SiteContent, BuildDate) -> String
 
@@ -149,6 +155,12 @@ pub(all) struct PublishPageSource {
   source : String
 } derive(Eq, @debug.Debug)
 
+pub(all) struct PublishRSSConfiguration {
+  target_path : String
+  ttl : Int
+  maximum_item_count : Int
+} derive(Eq, @debug.Debug)
+
 pub(all) struct PublishSection {
   id : String
   content : LocationContent
@@ -159,6 +171,15 @@ pub(all) struct PublishSectionSource {
   id : String
   index_source : String?
   items : Array[PostSource]
+} derive(Eq, @debug.Debug)
+
+pub(all) struct PublishSiteConfig {
+  url : String
+  name : String
+  description : String
+  language : String
+  image_path : String?
+  favicon_path : String?
 } derive(Eq, @debug.Debug)
 
 pub(all) struct PublishedContent {
