@@ -37,6 +37,8 @@ pub fn default_favicon() -> Favicon
 
 pub fn default_foundation_theme_configuration() -> FoundationThemeConfiguration
 
+pub fn default_git_deployment_configuration(String, String) -> GitDeploymentConfiguration
+
 pub fn default_publish_rss_configuration() -> PublishRSSConfiguration
 
 pub fn deployment_step(String, (PublishingContext) -> Result[PublishingContext, String]) -> PublishingStep
@@ -50,6 +52,12 @@ pub fn foundation_html_factory(PublishSiteConfig, configuration? : FoundationThe
 pub fn foundation_stylesheet() -> String
 
 pub fn generate_publish_html(String, PublishedContent, PublishHTMLFactory, file_mode? : HTMLFileMode, tag_base_path? : String) -> Unit raise @fs.IOError
+
+pub fn git_deployment_step(GitDeploymentConfiguration, (DeploymentCommand) -> Result[Unit, String]) -> PublishingStep
+
+pub fn github_deployment_remote(String, use_ssh? : Bool) -> String
+
+pub fn github_deployment_step(String, String, (DeploymentCommand) -> Result[Unit, String], branch? : String, use_ssh? : Bool, commit_message? : String) -> PublishingStep
 
 pub fn group_publishing_steps(Array[PublishingStep]) -> PublishingStep
 
@@ -142,6 +150,12 @@ pub(all) struct BuildDate {
 } derive(Eq, @debug.Debug)
 pub fn BuildDate::parse(String) -> Self?
 
+pub(all) struct DeploymentCommand {
+  working_directory : String
+  executable : String
+  arguments : Array[String]
+} derive(Eq, @debug.Debug)
+
 pub(all) struct Favicon {
   path : String
   mime_type : String
@@ -151,6 +165,13 @@ pub(all) struct FoundationThemeConfiguration {
   tag_base_path : String
   stylesheet_paths : Array[String]
   feed_path : String?
+} derive(Eq, @debug.Debug)
+
+pub(all) struct GitDeploymentConfiguration {
+  remote : String
+  branch : String
+  working_directory : String
+  commit_message : String
 } derive(Eq, @debug.Debug)
 
 pub(all) enum HTMLFileMode {

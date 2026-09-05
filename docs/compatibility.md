@@ -56,10 +56,10 @@
 - audio player、hosted/YouTube/Vimeo video player component
 - built-in Foundation themeの全location renderer
 - Foundation stylesheetとresource書き込み
+- Git / GitHub built-in deployment helper
+- shell非依存のcommand runner注入とdeployment gating
 
 ### 未実装
-
-- Git / GitHub built-in deployment helper
 - Publish CLIの`new`、`generate`、`run`相当
 - incremental generation cache
 
