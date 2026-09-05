@@ -15,7 +15,17 @@ pub fn load_site_content(String) -> SiteContent raise @fs.IOError
 
 pub fn parse_source(String) -> SourceDocument
 
+pub fn render_index_page(SiteConfig, SiteContent) -> String
+
 pub fn render_markdown(String) -> String
+
+pub fn render_post_page(SiteConfig, Post) -> String
+
+pub fn render_section_page(SiteConfig, SiteContent) -> String
+
+pub fn render_tag_details_page(SiteConfig, SiteContent, String) -> String
+
+pub fn render_tag_list_page(SiteConfig, SiteContent) -> String
 
 pub fn version() -> String
 
@@ -50,6 +60,20 @@ pub fn Post::path(Self) -> String
 pub(all) struct PostSource {
   slug : String
   source : String
+} derive(Eq, @debug.Debug)
+
+pub(all) struct SiteConfig {
+  url : String
+  name : String
+  description : String
+  language : String
+  image_path : String
+  favicon_path : String
+  stylesheet_path : String
+  feed_path : String
+  analytics_id : String
+  x_url : String
+  github_url : String
 } derive(Eq, @debug.Debug)
 
 pub(all) struct SiteContent {

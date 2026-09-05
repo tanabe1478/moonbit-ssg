@@ -149,7 +149,7 @@ pub fn load_site_content(
 ) -> SiteContent raise @fs.IOError {
   let posts_directory = join_path(content_directory, "posts")
   let names = @fs.read_dir(posts_directory)
-  names.sort()
+  names.sort_by(compare_unicode_scalars)
   let post_sources : Array[PostSource] = []
   for name in names {
     if markdown_filename(name) {

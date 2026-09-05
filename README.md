@@ -2,7 +2,7 @@
 
 Publish互換を目標にした、MoonBit製の静的サイトジェネレーターです。
 
-Swift Publishによる既存サイトを正解として、生成結果を比較しながら段階的に機能を追加しています。現在はfrontmatter解析、現行43記事で一致するMarkdownからHTMLへの変換、Content directoryからのsite model構築まで実装済みです。
+Swift Publishによる既存サイトを正解として、生成結果を比較しながら段階的に機能を追加しています。現在はfrontmatter解析、現行43記事で一致するMarkdown変換、Content directoryからのsite model構築、Publish互換themeのHTML生成まで実装済みです。
 
 ## 開発環境
 
@@ -34,6 +34,8 @@ moonbit-ssg 0.1.0
 ├── markdown_test.mbt  # Markdown互換性のblack-box test
 ├── source.mbt         # frontmatter parserと入力data model
 ├── source_test.mbt    # 入力parserのblack-box test
+├── theme.mbt          # index・section・post・tag page renderer
+├── theme_test.mbt     # themeのblack-box test
 ├── ssg.mbt            # 再利用可能なlibrary API
 ├── ssg_test.mbt       # library APIのblack-box test
 ├── moon.mod           # module全体のmetadataと依存package
@@ -168,6 +170,33 @@ pub(all) struct Post {
 - file I/Oを行う`load_site_content`と、純粋にmodelを組み立てる`build_site_content`を分け、並び順などを小さなtestで確認できるようにしています。
 
 記事titleはfrontmatter、最初のlevel-one heading、file名の順にfallbackします。記事一覧用の日付降順、tag抽出とtag別記事抽出もこの層で提供します。section pageだけはPublishの現行挙動に合わせ、file名順の元配列を使います。
+
+## Publish互換theme
+
+`theme.mbt`は`SiteConfig`と`SiteContent`から、次のHTMLを文字列として生成します。
+
+- site index
+- posts section
+- post detail
+- tag list
+- tag detail
+
+先に純粋な`String` rendererとして実装し、directory作成やfile書き込みは次の層へ分離しています。これにより、head metadata、記事順、Google Analyticsの挿入範囲などをfilesystemなしでtestできます。
+
+```moonbit
+pub fn render_post_page(config : SiteConfig, post : Post) -> String
+```
+
+`SiteConfig`にはsite URL、名前、説明、favicon、stylesheet、feed、profile linkなど、Swift側の`Website`とthemeに埋め込まれていた値を集約しています。
+
+互換性のため、通常なら変更したくなる次の挙動も現行出力に合わせています。
+
+- indexとtagは日付降順、sectionは元のfile名順
+- Google Analytics nodeはcustom headを使うindex・section・tag pageだけに挿入
+- tag detailのcanonical URLではUnicode pathをUTF-8 percent encoding
+- 空文字ではなく文字列`""`のdescriptionは、そのままmeta tagと一覧へ出力
+
+現行siteのindex、section、tag list、tag detail、代表postをbyte単位で比較し、すべてPublish出力との一致を確認しています。
 
 ## 移行の検証方針
 
