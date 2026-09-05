@@ -1,0 +1,5 @@
+import {
+  "tanabe1478/moonbit-ssg" @ssg,
+}
+
+pkgtype(kind: "executable")
