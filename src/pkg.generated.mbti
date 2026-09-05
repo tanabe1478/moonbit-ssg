@@ -35,6 +35,8 @@ pub fn copy_publish_theme_resources(String, Array[String], String) -> Unit raise
 
 pub fn default_favicon() -> Favicon
 
+pub fn default_foundation_theme_configuration() -> FoundationThemeConfiguration
+
 pub fn default_publish_rss_configuration() -> PublishRSSConfiguration
 
 pub fn deployment_step(String, (PublishingContext) -> Result[PublishingContext, String]) -> PublishingStep
@@ -42,6 +44,10 @@ pub fn deployment_step(String, (PublishingContext) -> Result[PublishingContext, 
 pub fn empty_publishing_step() -> PublishingStep
 
 pub fn execute_publish_pipeline(PublishingContext, Array[PublishingStep], deploy? : Bool) -> Result[PublishingContext, String]
+
+pub fn foundation_html_factory(PublishSiteConfig, configuration? : FoundationThemeConfiguration) -> PublishHTMLFactory
+
+pub fn foundation_stylesheet() -> String
 
 pub fn generate_publish_html(String, PublishedContent, PublishHTMLFactory, file_mode? : HTMLFileMode, tag_base_path? : String) -> Unit raise @fs.IOError
 
@@ -105,6 +111,8 @@ pub fn sort_publish_items(PublishedContent, (PublishItem, PublishItem) -> Int, o
 
 pub fn version() -> String
 
+pub fn write_foundation_stylesheet(String) -> Unit raise @fs.IOError
+
 pub fn write_site_output(SiteConfig, String, String, String, theme_stylesheet? : String, build_date? : BuildDate) -> Unit raise @fs.IOError
 
 // Errors
@@ -137,6 +145,12 @@ pub fn BuildDate::parse(String) -> Self?
 pub(all) struct Favicon {
   path : String
   mime_type : String
+} derive(Eq, @debug.Debug)
+
+pub(all) struct FoundationThemeConfiguration {
+  tag_base_path : String
+  stylesheet_paths : Array[String]
+  feed_path : String?
 } derive(Eq, @debug.Debug)
 
 pub(all) enum HTMLFileMode {

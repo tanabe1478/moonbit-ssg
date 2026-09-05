@@ -54,10 +54,11 @@
 - target folder指定とtheme resource set
 - favicon linkと既定favicon設定
 - audio player、hosted/YouTube/Vimeo video player component
+- built-in Foundation themeの全location renderer
+- Foundation stylesheetとresource書き込み
 
 ### 未実装
 
-- Foundation theme
 - Git/S3 custom deployment method
 - Publish CLIの`new`、`generate`、`run`相当
 - incremental generation cache
