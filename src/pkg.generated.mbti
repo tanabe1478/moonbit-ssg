@@ -7,6 +7,10 @@ import {
 }
 
 // Values
+pub fn add_publish_item(PublishedContent, PublishItem) -> Result[PublishedContent, String]
+
+pub fn add_publish_page(PublishedContent, PublishPage) -> PublishedContent
+
 pub fn banner() -> String
 
 pub fn build_publish_item(String, String, String) -> PublishItem
@@ -25,7 +29,19 @@ pub fn load_published_content(String, Array[String]) -> PublishedContent raise @
 
 pub fn load_site_content(String) -> SiteContent raise @fs.IOError
 
+pub fn mutate_publish_item(PublishedContent, String, String, (PublishItem) -> Result[PublishItem, String]) -> Result[PublishedContent, String]
+
+pub fn mutate_publish_items(PublishedContent, PublishPredicate[PublishItem], (PublishItem) -> Result[PublishItem, String], section_id? : String) -> Result[PublishedContent, String]
+
+pub fn mutate_publish_pages(PublishedContent, PublishPredicate[PublishPage], (PublishPage) -> Result[PublishPage, String]) -> Result[PublishedContent, String]
+
 pub fn parse_source(String) -> SourceDocument
+
+pub fn[T] publish_predicate((T) -> Bool) -> PublishPredicate[T]
+
+pub fn[T] publish_predicate_any() -> PublishPredicate[T]
+
+pub fn remove_publish_items(PublishedContent, PublishPredicate[PublishItem], section_id? : String) -> PublishedContent
 
 pub fn render_index_page(SiteConfig, SiteContent) -> String
 
@@ -48,6 +64,8 @@ pub fn render_sitemap(SiteConfig, SiteContent, BuildDate) -> String
 pub fn render_tag_details_page(SiteConfig, SiteContent, String) -> String
 
 pub fn render_tag_list_page(SiteConfig, SiteContent) -> String
+
+pub fn sort_publish_items(PublishedContent, (PublishItem, PublishItem) -> Int, order? : SortOrder, section_id? : String) -> PublishedContent
 
 pub fn version() -> String
 
@@ -183,6 +201,13 @@ pub(all) struct PublishPageSource {
   source : String
 } derive(Eq, @debug.Debug)
 
+pub(all) struct PublishPredicate[T] {
+  matches : (T) -> Bool
+}
+pub fn[T] PublishPredicate::and_also(Self[T], Self[T]) -> Self[T]
+pub fn[T] PublishPredicate::inverse(Self[T]) -> Self[T]
+pub fn[T] PublishPredicate::or_else(Self[T], Self[T]) -> Self[T]
+
 pub(all) struct PublishRSSConfiguration {
   target_path : String
   ttl : Int
@@ -250,6 +275,11 @@ pub(all) struct SiteContent {
 pub fn SiteContent::all_tags(Self) -> Array[String]
 pub fn SiteContent::posts_by_descending_date(Self) -> Array[Post]
 pub fn SiteContent::posts_tagged_with(Self, String) -> Array[Post]
+
+pub(all) enum SortOrder {
+  Ascending
+  Descending
+} derive(Eq, @debug.Debug)
 
 pub(all) struct SourceDocument {
   metadata : Metadata

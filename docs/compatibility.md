@@ -45,10 +45,12 @@
 - Apple Podcasts / Media RSS互換podcast feed
 - podcast author、category、episode、season、explicit metadata
 - audio enclosure、duration、sizeの検証error
+- composable Predicateとinverse / AND / OR
+- item・pageの追加、削除、fallible mutation
+- section指定付きitem sortと昇順・降順
 
 ### 未実装
 
-- Predicate、item/page mutation、汎用sort step
 - optional/group/custom stepとplugin installer
 - 任意file/folder copy stepとtheme resource set
 - Foundation theme
