@@ -17,6 +17,8 @@ pub fn build_publish_item(String, String, String) -> PublishItem
 
 pub fn build_publish_page(String, String) -> PublishPage
 
+pub fn build_publish_project(String, build_date? : BuildDate) -> Result[String, String]
+
 pub fn build_published_content(String, Array[PublishSectionSource], Array[PublishPageSource]) -> PublishedContent
 
 pub fn build_site_content(String, String, Array[PostSource]) -> SiteContent
@@ -32,6 +34,8 @@ pub fn copy_publish_files(String, String, target_folder? : String, include_folde
 pub fn copy_publish_files_step(String, target_folder? : String, include_folder? : Bool) -> PublishingStep
 
 pub fn copy_publish_theme_resources(String, Array[String], String) -> Unit raise @fs.IOError
+
+pub fn create_publish_project(String, name? : String, first_post_date? : String) -> Bool raise @fs.IOError
 
 pub fn default_favicon() -> Favicon
 
@@ -74,6 +78,8 @@ pub fn mutate_publish_items(PublishedContent, PublishPredicate[PublishItem], (Pu
 pub fn mutate_publish_pages(PublishedContent, PublishPredicate[PublishPage], (PublishPage) -> Result[PublishPage, String]) -> Result[PublishedContent, String]
 
 pub fn optional_publishing_step(PublishingStep) -> PublishingStep
+
+pub fn parse_publish_project_configuration(String) -> Result[PublishProjectConfiguration, String]
 
 pub fn parse_source(String) -> SourceDocument
 
@@ -288,6 +294,13 @@ pub(all) struct PublishPredicate[T] {
 pub fn[T] PublishPredicate::and_also(Self[T], Self[T]) -> Self[T]
 pub fn[T] PublishPredicate::inverse(Self[T]) -> Self[T]
 pub fn[T] PublishPredicate::or_else(Self[T], Self[T]) -> Self[T]
+
+pub(all) struct PublishProjectConfiguration {
+  site : PublishSiteConfig
+  section_ids : Array[String]
+  tag_base_path : String?
+  output_directory : String
+} derive(Eq, @debug.Debug)
 
 pub(all) struct PublishRSSConfiguration {
   target_path : String

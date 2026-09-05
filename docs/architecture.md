@@ -50,4 +50,4 @@ private実装の形ではなく利用者から見える振る舞いを固定す�
 
 ## CLI package
 
-`cmd/main`は引数の解釈とerror表示だけを担当します。生成処理は`src`の公開APIを呼び出し、CLI固有の処理へ埋め込みません。
+`cmd/main`は引数の解釈とerror表示だけを担当します。`new`のscaffold、`generate`の汎用project build、ブログ互換buildはいずれも`src`の公開APIを呼び出し、生成処理をCLI固有コードへ埋め込みません。

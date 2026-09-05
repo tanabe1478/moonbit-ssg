@@ -16,11 +16,20 @@ mise install
 
 ## CLIの使い方
 
-versionを表示します。
+helpを表示します。
 
 ```sh
 mise exec -- moon run cmd/main
 ```
+
+Foundation themeを使う新しいsite projectを作成し、生成します。
+
+```sh
+mise exec -- moon run cmd/main -- new my-site "My Site"
+mise exec -- moon run cmd/main -- generate my-site
+```
+
+生成された`site.md`でURL、site名、section、tag path、output directoryを設定できます。
 
 Markdown本文をPublish互換HTMLへ変換します。
 
@@ -28,7 +37,7 @@ Markdown本文をPublish互換HTMLへ変換します。
 mise exec -- moon run cmd/main -- render-markdown PATH_TO_POST.md
 ```
 
-`tanabe1478/blog`互換のsiteを生成します。
+移行検証用に`tanabe1478/blog`互換のsiteを直接生成する場合:
 
 ```sh
 mise exec -- moon run cmd/main -- build Content Resources Output

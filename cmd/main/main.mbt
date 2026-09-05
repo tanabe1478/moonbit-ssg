@@ -7,6 +7,22 @@ fn fail(message : String) -> Unit {
 }
 
 ///|
+fn print_help() -> Unit {
+  println(
+    (
+      #|moonbit-ssg
+      #|
+      #|Commands:
+      #|  new [DIRECTORY] [NAME]       Create a Foundation website project
+      #|  generate [ROOT] [BUILD_DATE] Generate the current generic project
+      #|  render-markdown INPUT        Render one Markdown file
+      #|  build CONTENT RESOURCES OUTPUT [BUILD_DATE]
+      #|                               Build the tanabe1478/blog-compatible site
+    ),
+  )
+}
+
+///|
 fn blog_config() -> @ssg.SiteConfig {
   {
     url: "https://tanabe1478.github.io",
@@ -51,10 +67,60 @@ fn build_site(
 }
 
 ///|
+fn create_project(directory : String, name : String?) -> Unit {
+  let created = @ssg.create_publish_project(directory, name?) catch {
+    @fs.IOError(message) => {
+      fail("unable to create project: \{message}")
+      return
+    }
+  }
+  if !created {
+    fail("new project directory must be empty: \{directory}")
+    return
+  }
+  println("Generated website project at \{directory}")
+}
+
+///|
+fn generate_project(root : String, build_date : @ssg.BuildDate?) -> Unit {
+  match @ssg.build_publish_project(root, build_date?) {
+    Ok(output) => println("Generated site at \{output}")
+    Err(error) => fail("unable to generate site: \{error}")
+  }
+}
+
+///|
+fn parsed_build_date(value : String) -> @ssg.BuildDate {
+  match @ssg.BuildDate::parse(value) {
+    Some(date) => date
+    None => {
+      fail("build date must use yyyy-MM-ddTHH:mm:ss with optional +HHMM")
+      return @ssg.BuildDate::parse("1970-01-01T00:00:00+0000").unwrap()
+    }
+  }
+}
+
+///|
 fn main {
   let args = @env.args()
   if args.length() == 1 {
-    println(@ssg.banner())
+    print_help()
+    return
+  }
+  if args[1] == "new" && args.length() >= 2 && args.length() <= 4 {
+    let directory = if args.length() >= 3 { args[2] } else { "." }
+    let name = if args.length() == 4 { Some(args[3]) } else { None }
+    create_project(directory, name)
+    return
+  }
+  if args[1] == "generate" && args.length() >= 2 && args.length() <= 4 {
+    let root = if args.length() >= 3 { args[2] } else { "." }
+    let build_date = if args.length() == 4 {
+      Some(parsed_build_date(args[3]))
+    } else {
+      None
+    }
+    generate_project(root, build_date)
     return
   }
   if args.length() == 3 && args[1] == "render-markdown" {
@@ -66,14 +132,9 @@ fn main {
     return
   }
   if args.length() == 6 && args[1] == "build" {
-    match @ssg.BuildDate::parse(args[5]) {
-      Some(date) => build_site(args[2], args[3], args[4], Some(date))
-      None =>
-        fail("build date must use yyyy-MM-ddTHH:mm:ss with optional +HHMM")
-    }
+    build_site(args[2], args[3], args[4], Some(parsed_build_date(args[5])))
     return
   }
-  fail(
-    "usage: moonbit-ssg [render-markdown INPUT | build CONTENT RESOURCES OUTPUT [BUILD_DATE]]",
-  )
+  print_help()
+  fail("unknown command or invalid arguments")
 }
