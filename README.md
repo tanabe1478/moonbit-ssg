@@ -1,83 +1,61 @@
 # moonbit-ssg
 
-Swift Publish 0.9互換を目標にした、MoonBit製の静的サイトジェネレーターです。
+[日本語](README.ja.md)
 
-現在は`tanabe1478/blog`が使用する生成機能を移行済みで、Swift Publishの出力と全ファイルがbyte単位で一致しています。Publishの汎用機能についても段階的に互換範囲を広げています。
+A static site generator written in MoonBit, with output and capabilities compatible with Swift Publish 0.9.
 
-## 必要な環境
+`tanabe1478/blog` now uses moonbit-ssg as its sole production generator. Before removing Swift Publish, the migration was validated against 88 generated files byte-for-byte and with pixel-identical desktop and mobile browser checks.
 
-MoonBit toolchainは[mise](https://mise.jdx.dev/)で管理しています。
+## Requirements
+
+The repository manages its MoonBit toolchain with [mise](https://mise.jdx.dev/).
 
 ```sh
 mise install
 ```
 
-`mise.toml`はMoonBit `0.10.11+6ff76a5f9`を固定し、公式archiveと標準libraryのSHA-256を検証します。
+`mise.toml` pins MoonBit `0.10.11+6ff76a5f9` and verifies the SHA-256 checksums of the official toolchain and standard library archives.
 
-## CLIの使い方
+The `run` command additionally requires Python 3. Git deployment requires Git and credentials supplied by your SSH agent or Git credential manager.
 
-helpを表示します。
-
-```sh
-mise exec -- moon run cmd/main
-```
-
-Foundation themeを使う新しいsite projectを作成し、生成します。
+## Quick start
 
 ```sh
+git clone https://github.com/tanabe1478/moonbit-ssg.git
+cd moonbit-ssg
+mise install
+
 mise exec -- moon run cmd/main -- new my-site "My Site"
 mise exec -- moon run cmd/main -- generate my-site
 mise exec -- moon run cmd/main -- run my-site -p 8000
 ```
 
-`run`はsiteを再生成してからPython標準HTTP serverを起動します。生成された`site.md`でURL、site名、section、tag path、output directoryを設定できます。`.publish/Caches`はstep単位の永続cacheで、変更のないfeedを再利用します。libraryからは`render_cached_publish_rss_feed`と`render_cached_publish_podcast_feed`を利用できます。
+The generated website uses `site.md` for configuration, `Content/` for Markdown, `Resources/` for static files, and `Output/` for generated files.
 
-Git remoteへdeployする場合は`site.md`のfrontmatterへ設定を追加します。
+See the [usage guide](docs/usage.md) for project configuration, content layout, deployment, plugins, and library examples.
 
-```yaml
-deploymentRemote: git@github.com:owner/site.git
-deploymentBranch: pages
-deploymentDirectory: .publish/Git
-deploymentCommitMessage: Publish deploy
+## CLI overview
+
+```text
+new [website] [DIRECTORY] [NAME]  Create a Foundation website project
+new plugin [DIRECTORY] [NAME]     Create a plugin package in a module
+generate [ROOT] [BUILD_DATE]      Generate a generic project
+run [ROOT] [-p PORT]              Generate and serve a generic project
+deploy [ROOT]                     Generate and deploy a generic project
+render-markdown INPUT             Render one Markdown file
+build CONTENT RESOURCES OUTPUT [BUILD_DATE]
+                                  Build the tanabe1478/blog-compatible site
 ```
+
+Run the CLI without arguments to display its help:
 
 ```sh
-mise exec -- moon run cmd/main -- deploy my-site
+mise exec -- moon run cmd/main
 ```
 
-tokenは`site.md`やremote URLへ書かず、SSH agentまたはGit credential managerで管理してください。
+## Using the library
 
-既存のMoonBit moduleへplugin packageを追加する場合:
-
-```sh
-mise exec -- moon run cmd/main -- \
-  new plugin path/to/image_optimizer "Image Optimizer"
-```
-
-生成されるpackageは、親moduleの`moon.mod`が`tanabe1478/moonbit-ssg`へ依存していることを前提にします。moduleや架空のregistry dependencyは自動生成しません。
-
-Markdown本文をPublish互換HTMLへ変換します。
-
-```sh
-mise exec -- moon run cmd/main -- render-markdown PATH_TO_POST.md
-```
-
-移行検証用に`tanabe1478/blog`互換のsiteを直接生成する場合:
-
-```sh
-mise exec -- moon run cmd/main -- build Content Resources Output
-```
-
-再現可能な比較buildでは、最後にbuild日時とUTC offsetを指定します。offsetを省略すると`+0900`です。
-
-```sh
-mise exec -- moon run cmd/main -- \
-  build Content Resources Output 2026-09-05T13:44:37+0900
-```
-
-## Libraryとして使う
-
-利用側packageの`moon.pkg`からlibrary packageをimportします。
+Import the library package from a consumer package's `moon.pkg`:
 
 ```moonbit
 import {
@@ -85,30 +63,25 @@ import {
 }
 ```
 
-例:
+Then use the public parsers and renderers:
 
 ```moonbit
 let document = @ssg.parse_source(markdown)
 let html = @ssg.render_markdown(document.markdown)
-```
-
-複数section・free-form pageを含むPublish形式の`Content` directoryも読み込めます。
-
-```moonbit
 let content = @ssg.load_published_content("Content", ["posts", "episodes"])
 ```
 
-公開APIの詳細は`src/pkg.generated.mbti`で確認できます。
+The complete generated public interface is available in [`src/pkg.generated.mbti`](src/pkg.generated.mbti).
 
-## 開発
+## Development
 
-format、型検査、全testを実行します。
+Run formatting checks, type checking, and all tests:
 
 ```sh
 mise run check
 ```
 
-個別のMoonBit commandを使う場合:
+Individual commands:
 
 ```sh
 mise exec -- moon fmt
@@ -117,26 +90,28 @@ mise exec -- moon test
 mise exec -- moon info
 ```
 
-## Directory構成
+## Repository layout
 
 ```text
 .
-├── src/                 # 再利用可能なlibrary package
-├── tests/               # libraryのblack-box test package
+├── src/                 # Reusable library package
+├── tests/               # Black-box library tests
 ├── cmd/main/            # CLI executable package
-├── docs/                # 設計・内部実装・互換範囲
-├── moon.mod             # module metadataと依存
-├── mise.toml            # toolchain固定と開発task
-└── README.md            # 導入と利用方法
+├── docs/                # Usage, design, implementation, compatibility
+├── resources/           # Built-in Foundation theme resources
+├── moon.mod             # Module metadata and dependencies
+├── mise.toml            # Pinned toolchain and development tasks
+└── README.md            # English entry point
 ```
 
-MoonBitでは`moon.pkg`を置いたdirectoryがpackage境界です。`src`内の機能は相互依存が強いため一つのlibrary packageにし、CLIとtestだけを別packageに分離しています。
+A directory containing `moon.pkg` is a MoonBit package boundary. Closely related SSG components remain in one `src` package, while the CLI and black-box tests use separate packages.
 
 ## Documentation
 
-- [`docs/architecture.md`](docs/architecture.md) — package構成と設計方針
-- [`docs/implementation.md`](docs/implementation.md) — parserやrendererの内部実装
-- [`docs/compatibility.md`](docs/compatibility.md) — Publish 0.9との互換範囲
+- Usage: [English](docs/usage.md) / [日本語](docs/usage.ja.md)
+- Architecture: [English](docs/architecture.md) / [日本語](docs/architecture.ja.md)
+- Implementation guide: [English](docs/implementation.md) / [日本語](docs/implementation.ja.md)
+- Publish 0.9 compatibility: [English](docs/compatibility.md) / [日本語](docs/compatibility.ja.md)
 
 ## License
 

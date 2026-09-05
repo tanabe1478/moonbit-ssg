@@ -1,80 +1,82 @@
 # Publish 0.9 compatibility
 
-比較対象はSwift Publish `0.9.0`（revision `1c8ad00d39c985cb5d497153241a2f1b654e0d40`）です。
+[日本語](compatibility.ja.md)
 
-「ブログ移行に必要な互換性」と「Publish framework全体の汎用機能」は分けて管理します。
+The reference is Swift Publish `0.9.0` at revision `1c8ad00d39c985cb5d497153241a2f1b654e0d40`.
 
-## tanabe1478/blogで使用している機能
+Compatibility is tracked in two layers: the exact migration contract required by `tanabe1478/blog`, and reusable capabilities from the broader Publish framework. Swift source-level API compatibility is not a goal.
 
-以下は移行済みです。
+## tanabe1478/blog migration contract
 
-- Ink互換frontmatter
-- Markdown HTML変換
+Implemented:
+
+- Ink-compatible frontmatter
+- Markdown-to-HTML conversion
 - YouTube modifier
-- shell / Swift syntax highlight
-- index、posts section、item、tag list、tag details
-- custom theme metadata、canonical URL、OGP、Analytics
-- Resourcesとtheme stylesheetのcopy
+- shell and Swift syntax highlighting markup
+- index, posts section, item, tag list, and tag details pages
+- custom theme metadata, canonical URLs, Open Graph data, and Analytics
+- recursive Resources and theme stylesheet copying
 - RSS 2.0
 - sitemap
-- clean output build
-- build timezone offsetの再現
+- clean output builds
+- build timezone offset preservation
 
-現行blogではSwift Publish referenceとMoonBit candidateの全生成ファイルをbyte単位で比較しています。desktop/mobileの主要ページもagent-browserでpixel差分がないことを確認しています。
+Before Swift Publish was removed from the blog repository, 88 generated files were verified byte-for-byte. Representative index, latest post, tag list, migrated post, desktop, and mobile renders were also checked with zero pixel difference. The blog now generates production output with moonbit-ssg only.
 
-## Publish汎用機能
+## Reusable Publish capabilities
 
-### 実装済み
+Implemented:
 
-- 複数sectionのcontent model
-- root Markdown page
-- sectionではないfolder以下の再帰page
-- nested item path
-- `.md`、`.markdown`、`.txt`、`.text`入力
-- custom metadataの保持
-- itemの`path` override
-- RSS item propertiesのmodel
-- audio / video metadataのmodel
-- custom HTML factory callback
-- index、section、item、page、tag HTML生成
-- `foldersAndIndexFiles` / `standAloneFiles`
-- tag HTMLの無効化
-- configurable RSS feed、section選択、item predicate
-- RSS GUID、link、title/body prefix・suffix override
-- 複数section・page対応sitemapとexcluded path
-- Apple Podcasts / Media RSS互換podcast feed
-- podcast author、category、episode、season、explicit metadata
-- audio enclosure、duration、sizeの検証error
-- composable Predicateとinverse / AND / OR
-- item・pageの追加、削除、fallible mutation
-- section指定付きitem sortと昇順・降順
-- empty、group、conditional、optional、custom publishing step
-- plugin installer、custom deployment step、generation/deploymentの実行制御
-- 任意file、folder内容、folder自体のcopy step
-- target folder指定とtheme resource set
-- favicon linkと既定favicon設定
-- audio player、hosted/YouTube/Vimeo video player component
-- built-in Foundation themeの全location renderer
-- Foundation stylesheetとresource書き込み
-- Git / GitHub built-in deployment helper
-- shell非依存のcommand runner注入とdeployment gating
-- CLIのwebsite `new`、`generate`、`run`（既定port 8000・port指定）
-- `site.md`による汎用site・section・output設定
-- step名で分離した`.publish/Caches`永続cache API
-- RSS / podcast feed cache（設定・contentが不変なら以前のfeedを再利用）
-- CLIのGit `deploy`（生成、永続checkout、branch fallback、output同期、push）
-- CLIの`new plugin` package scaffold
+- multiple-section content model
+- root Markdown pages
+- recursive pages below non-section directories
+- nested item paths
+- `.md`, `.markdown`, `.txt`, and `.text` input
+- custom metadata preservation
+- item `path` overrides
+- RSS item properties
+- audio and video metadata
+- callback-based custom HTML factories
+- index, section, item, page, tag list, and tag details generation
+- `FoldersAndIndexFiles` and `StandAloneFiles`
+- optional tag HTML generation
+- configurable RSS feeds, section selection, and item predicates
+- RSS GUID, link, title/body prefix, and suffix overrides
+- sitemap generation for multiple sections and pages with excluded paths
+- Apple Podcasts and Media RSS-compatible podcast feeds
+- podcast author, category, episode, season, and explicit metadata
+- audio enclosure, duration, and size validation
+- composable predicates with inverse, AND, and OR
+- immutable item/page add, remove, mutation, and section sorting
+- ascending and descending sort order
+- empty, grouped, conditional, optional, custom, generation, and deployment steps
+- plugin installation and deployment gating
+- file, directory-content, directory, and theme-resource copy steps
+- target directory support
+- favicon rendering and defaults
+- audio and hosted/YouTube/Vimeo video components
+- built-in Foundation renderers for every location
+- Foundation stylesheet and resource writing
+- injected-runner Git and GitHub deployment helpers
+- executable/argument separation instead of interpolated shell commands
+- website `new`, `generate`, and `run` CLI commands
+- generic `site.md` configuration
+- step-scoped persistent `.publish/Caches` API
+- cached RSS and podcast feed rendering
+- Git `deploy` CLI with persistent checkout, branch fallback, synchronization, and push
+- `new plugin` package scaffolding
 
-### 既知の差異
+## Known difference
 
-Swift Publishの`new plugin`はSwift Packageとremote dependencyを生成します。MoonBit package managerはregistry外のGit dependencyをmodule manifestへ直接指定できないため、MoonBit版は既存module内へ追加する`moon.pkg`とplugin sourceを生成します。親moduleのdependencyは利用者が明示的に管理します。
+Swift Publish's `new plugin` creates a complete Swift Package with a remote package dependency. MoonBit module manifests cannot directly declare a Git dependency that is not available in the package registry. The MoonBit command therefore creates `moon.pkg` and plugin source inside an existing module. The parent module owns dependency declaration and version selection.
 
-今後差異が見つかった場合も、機能群ごとにtestを先に追加し、既存blogのbyte parityを壊さない形で移行します。
+## Meaning of compatibility
 
-## 互換性の意味
+MoonBit and Swift have different type systems, error handling, mutation models, and package managers. Compatibility means:
 
-MoonBitとSwiftでは型systemが異なるため、Swift source codeとのAPI互換は目標にしません。目標は次の3点です。
+1. Equivalent content and configuration can produce equivalent public files.
+2. Operations available in Publish pipelines have MoonBit-native alternatives.
+3. Known behavioral or packaging differences are documented.
 
-1. 同じcontentと設定から同じ公開fileを生成できること。
-2. Publishのpipelineで可能な操作にMoonBit側の代替APIがあること。
-3. 差異と未実装機能をこの文書で明示すること。
+Throwing/inout Swift APIs generally become immutable functions returning `Result`. Callback factories replace Swift generic protocols where that produces a clearer MoonBit API.
