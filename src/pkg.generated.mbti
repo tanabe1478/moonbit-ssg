@@ -33,6 +33,8 @@ pub fn copy_publish_files_step(String, target_folder? : String, include_folder? 
 
 pub fn copy_publish_theme_resources(String, Array[String], String) -> Unit raise @fs.IOError
 
+pub fn default_favicon() -> Favicon
+
 pub fn default_publish_rss_configuration() -> PublishRSSConfiguration
 
 pub fn deployment_step(String, (PublishingContext) -> Result[PublishingContext, String]) -> PublishingStep
@@ -77,11 +79,17 @@ pub fn render_markdown(String) -> String
 
 pub fn render_post_page(SiteConfig, Post) -> String
 
+pub fn render_publish_audio_player(Audio, show_controls? : Bool) -> String
+
+pub fn render_publish_favicon(Favicon) -> String
+
 pub fn render_publish_podcast_feed(PublishSiteConfig, PublishedContent, String, BuildDate, PodcastFeedConfiguration, item_predicate? : (PublishItem) -> Bool) -> Result[String, String]
 
 pub fn render_publish_rss_feed(PublishSiteConfig, PublishedContent, Array[String], BuildDate, configuration? : PublishRSSConfiguration, item_predicate? : (PublishItem) -> Bool) -> String
 
 pub fn render_publish_sitemap(PublishSiteConfig, PublishedContent, BuildDate, excluded_paths? : Array[String]) -> String
+
+pub fn render_publish_video_player(Video, show_controls? : Bool) -> String
 
 pub fn render_rss_feed(SiteConfig, SiteContent, BuildDate) -> String
 
@@ -125,6 +133,11 @@ pub(all) struct BuildDate {
   utc_offset : String
 } derive(Eq, @debug.Debug)
 pub fn BuildDate::parse(String) -> Self?
+
+pub(all) struct Favicon {
+  path : String
+  mime_type : String
+} derive(Eq, @debug.Debug)
 
 pub(all) enum HTMLFileMode {
   StandAloneFiles

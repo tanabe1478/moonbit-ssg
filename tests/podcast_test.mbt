@@ -84,13 +84,13 @@ test "render Publish-compatible podcast metadata and enclosure" {
   inspect(xml.contains("<itunes:season>2</itunes:season>"), content="true")
   inspect(
     xml.contains(
-      "<enclosure url=\"https://cdn.example.com/episode.mp3\" length=\"4567\" type=\"audio/mp3\"/>",
+      "<enclosure url=\"https://cdn.example.com/episode.mp3\" length=\"4567\" type=\"audio/mpeg\"/>",
     ),
     content="true",
   )
   inspect(
     xml.contains(
-      "<media:content url=\"https://cdn.example.com/episode.mp3\" length=\"4567\" type=\"audio/mp3\" isDefault=\"true\" medium=\"audio\"><media:title type=\"plain\">Episode One</media:title></media:content>",
+      "<media:content url=\"https://cdn.example.com/episode.mp3\" length=\"4567\" type=\"audio/mpeg\" isDefault=\"true\" medium=\"audio\"><media:title type=\"plain\">Episode One</media:title></media:content>",
     ),
     content="true",
   )

@@ -52,11 +52,12 @@
 - plugin installerとgeneration/deployment stepの実行制御
 - 任意file、folder内容、folder自体のcopy step
 - target folder指定とtheme resource set
+- favicon linkと既定favicon設定
+- audio player、hosted/YouTube/Vimeo video player component
 
 ### 未実装
 
 - Foundation theme
-- favicon、audio player、hosted/YouTube/Vimeo video player component
 - Git/S3 custom deployment method
 - Publish CLIの`new`、`generate`、`run`相当
 - incremental generation cache

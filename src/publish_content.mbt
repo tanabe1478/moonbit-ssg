@@ -131,7 +131,7 @@ fn parse_audio(metadata : Metadata) -> Audio? {
   }
   Some({
     url,
-    format: metadata.get("audio.format").unwrap_or("mp3"),
+    format: metadata.get("audio.format").unwrap_or("mpeg"),
     duration: parse_audio_duration(metadata.get("audio.duration")),
     byte_size: match metadata.get("audio.size") {
       Some(size) => parse_number(size)

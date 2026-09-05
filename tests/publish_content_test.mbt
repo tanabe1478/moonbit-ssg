@@ -63,7 +63,7 @@ test "build generic Publish sections pages and metadata" {
       #|Some(
       #|  {
       #|    url: "https://example.com/episode.mp3",
-      #|    format: "mp3",
+      #|    format: "mpeg",
       #|    duration: Some({ hours: 1, minutes: 2, seconds: 3 }),
       #|    byte_size: Some(1234),
       #|  },
