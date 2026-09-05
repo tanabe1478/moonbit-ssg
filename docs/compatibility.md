@@ -49,7 +49,7 @@
 - item・pageの追加、削除、fallible mutation
 - section指定付きitem sortと昇順・降順
 - empty、group、conditional、optional、custom publishing step
-- plugin installerとgeneration/deployment stepの実行制御
+- plugin installer、custom deployment step、generation/deploymentの実行制御
 - 任意file、folder内容、folder自体のcopy step
 - target folder指定とtheme resource set
 - favicon linkと既定favicon設定
@@ -59,7 +59,7 @@
 
 ### 未実装
 
-- Git/S3 custom deployment method
+- Git / GitHub built-in deployment helper
 - Publish CLIの`new`、`generate`、`run`相当
 - incremental generation cache
 
