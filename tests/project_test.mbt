@@ -12,6 +12,10 @@ test "parse generic Publish project configuration" {
       #|favicon: images/icon.png
       #|tagPath: topics
       #|output: Public
+      #|deploymentRemote: git@example.com:owner/site.git
+      #|deploymentBranch: pages
+      #|deploymentDirectory: .deploy/Site
+      #|deploymentCommitMessage: Deploy from test
       #|---
     ),
   ).unwrap()
@@ -19,6 +23,12 @@ test "parse generic Publish project configuration" {
   debug_inspect(configuration.section_ids, content="[\"posts\", \"episodes\"]")
   inspect(configuration.tag_base_path.unwrap(), content="topics")
   inspect(configuration.output_directory, content="Public")
+  let deployment = configuration.deployment.unwrap()
+  inspect(deployment.branch, content="pages")
+  let git = deployment.git_configuration("/work/site")
+  inspect(git.remote, content="git@example.com:owner/site.git")
+  inspect(git.working_directory, content="/work/site/.deploy/Site")
+  inspect(git.commit_message, content="Deploy from test")
 }
 
 ///|

@@ -68,8 +68,22 @@ fn run_deployment_command(
 }
 
 ///|
-fn prepare_git_deployment_directory(
-  context : PublishingContext,
+
+///|
+/// Creates the persistent directory used as a Git checkout.
+pub fn ensure_git_deployment_working_directory(
+  configuration : GitDeploymentConfiguration,
+) -> Result[Unit, String] {
+  ensure_directory(configuration.working_directory) catch {
+    @fs.IOError(message) => return Err(message)
+  }
+  Ok(())
+}
+
+///|
+/// Replaces deployment files with generated output while preserving `.git`.
+pub fn sync_git_deployment_output(
+  output_directory : String,
   configuration : GitDeploymentConfiguration,
 ) -> Result[Unit, String] {
   ensure_directory(configuration.working_directory) catch {
@@ -85,7 +99,7 @@ fn prepare_git_deployment_directory(
       }
     }
   }
-  copy_publish_files(context.output_directory, configuration.working_directory) catch {
+  copy_publish_files(output_directory, configuration.working_directory) catch {
     @fs.IOError(message) => return Err(message)
   }
   Ok(())
@@ -166,7 +180,7 @@ pub fn git_deployment_step(
           Err(error) => return Err(error)
         }
     }
-    match prepare_git_deployment_directory(context, configuration) {
+    match sync_git_deployment_output(context.output_directory, configuration) {
       Err(error) => return Err(error)
       Ok(_) => ()
     }

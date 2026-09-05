@@ -55,4 +55,4 @@ private実装の形ではなく利用者から見える振る舞いを固定す�
 
 ## CLI package
 
-`cmd/main`は引数の解釈とerror表示だけを担当します。`new`のscaffold、`generate`の汎用project build、ブログ互換buildはいずれも`src`の公開APIを呼び出し、生成処理をCLI固有コードへ埋め込みません。
+`cmd/main`は引数の解釈とerror表示を担当します。`new`のscaffold、`generate`の汎用project build、ブログ互換buildはいずれも`src`の公開APIを呼び出し、生成処理をCLI固有コードへ埋め込みません。`run`と`deploy`だけはhost processの起動が必要なため、CLI packageからargument配列としてPythonまたはGitを実行します。Git checkoutへのoutput同期はlibrary APIへ分離しています。

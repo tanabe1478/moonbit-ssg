@@ -62,10 +62,11 @@
 - `site.md`による汎用site・section・output設定
 - step名で分離した`.publish/Caches`永続cache API
 - RSS / podcast feed cache（設定・contentが不変なら以前のfeedを再利用）
+- CLIのGit `deploy`（生成、永続checkout、branch fallback、output同期、push）
 
 ### 未実装
 
-- CLIの`new plugin`、`deploy`相当
+- CLIの`new plugin`相当
 
 未実装項目は機能群ごとにtestを先に追加し、既存blogのbyte parityを壊さない形で移行します。
 

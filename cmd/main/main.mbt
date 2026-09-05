@@ -16,6 +16,7 @@ fn print_help() -> Unit {
       #|  new [DIRECTORY] [NAME]       Create a Foundation website project
       #|  generate [ROOT] [BUILD_DATE] Generate the current generic project
       #|  run [ROOT] [-p PORT]         Generate and serve a generic project
+      #|  deploy [ROOT]                Generate and deploy a generic project
       #|  render-markdown INPUT        Render one Markdown file
       #|  build CONTENT RESOURCES OUTPUT [BUILD_DATE]
       #|                               Build the tanabe1478/blog-compatible site
@@ -126,6 +127,108 @@ async fn run_project(root : String, port : Int) -> Unit {
 }
 
 ///|
+async fn run_git_command(
+  configuration : @ssg.GitDeploymentConfiguration,
+  arguments : Array[String],
+) -> Bool {
+  @process.run("git", arguments, cwd=configuration.working_directory) == 0
+}
+
+///|
+async fn require_git_command(
+  configuration : @ssg.GitDeploymentConfiguration,
+  arguments : Array[String],
+) -> Unit {
+  if !run_git_command(configuration, arguments) {
+    fail("git \{arguments.join(" ")} failed")
+  }
+}
+
+///|
+async fn deploy_project(root : String) -> Unit {
+  let output = match @ssg.build_publish_project(root) {
+    Ok(output) => output
+    Err(error) => {
+      fail("unable to generate site: \{error}")
+      return
+    }
+  }
+  let source = @fs.read_file_to_string(
+    root.trim_end(chars="/").to_owned() + "/site.md",
+  ) catch {
+    @fs.IOError(message) => {
+      fail("unable to read deployment settings: \{message}")
+      return
+    }
+  }
+  let project = match @ssg.parse_publish_project_configuration(source) {
+    Ok(project) => project
+    Err(error) => {
+      fail("unable to read deployment settings: \{error}")
+      return
+    }
+  }
+  let deployment = match project.deployment {
+    Some(deployment) => deployment
+    None => {
+      fail("site.md must define deploymentRemote before deployment")
+      return
+    }
+  }
+  let configuration = deployment.git_configuration(root)
+  match @ssg.ensure_git_deployment_working_directory(configuration) {
+    Err(error) => {
+      fail("unable to prepare deployment directory: \{error}")
+      return
+    }
+    Ok(_) => ()
+  }
+  let git_directory = configuration.working_directory
+    .trim_end(chars="/")
+    .to_owned() +
+    "/.git"
+  if !@fs.path_exists(git_directory) {
+    require_git_command(configuration, ["init"])
+    require_git_command(configuration, [
+      "remote",
+      "add",
+      "origin",
+      configuration.remote,
+    ])
+  }
+  require_git_command(configuration, [
+    "remote",
+    "set-url",
+    "origin",
+    configuration.remote,
+  ])
+  // Publish allows pull to fail so an empty remote can be deployed initially.
+  ignore(
+    run_git_command(configuration, ["pull", "origin", configuration.branch]),
+  )
+  if !run_git_command(configuration, ["checkout", configuration.branch]) {
+    require_git_command(configuration, ["checkout", "-b", configuration.branch])
+  }
+  match @ssg.sync_git_deployment_output(output, configuration) {
+    Err(error) => {
+      fail("unable to copy generated output for deployment: \{error}")
+      return
+    }
+    Ok(_) => ()
+  }
+  require_git_command(configuration, ["add", "."])
+  require_git_command(configuration, [
+    "commit",
+    "-a",
+    "-m",
+    configuration.commit_message,
+    "--allow-empty",
+  ])
+  require_git_command(configuration, ["push", "origin", configuration.branch])
+  println("Deployed site to \{configuration.remote} on \{configuration.branch}")
+}
+
+///|
 fn parsed_build_date(value : String) -> @ssg.BuildDate {
   match @ssg.BuildDate::parse(value) {
     Some(date) => date
@@ -176,6 +279,11 @@ async fn main {
       run_project(args[2], parse_port(args[4]))
       return
     }
+  }
+  if args[1] == "deploy" && (args.length() == 2 || args.length() == 3) {
+    let root = if args.length() == 3 { args[2] } else { "." }
+    deploy_project(root)
+    return
   }
   if args.length() == 3 && args[1] == "render-markdown" {
     render_markdown_file(args[2])

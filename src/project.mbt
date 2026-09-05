@@ -1,10 +1,20 @@
 ///|
+/// Optional Git deployment settings loaded from `site.md`.
+pub(all) struct PublishProjectDeployment {
+  remote : String
+  branch : String
+  directory : String
+  commit_message : String
+} derive(Eq, Debug)
+
+///|
 /// Configuration loaded from a MoonBit SSG project's `site.md`.
 pub(all) struct PublishProjectConfiguration {
   site : PublishSiteConfig
   section_ids : Array[String]
   tag_base_path : String?
   output_directory : String
+  deployment : PublishProjectDeployment?
 } derive(Eq, Debug)
 
 ///|
@@ -41,6 +51,18 @@ pub fn parse_publish_project_configuration(
     Some(path) => Some(path)
     None => Some("tags")
   }
+  let deployment = metadata
+    .get("deploymentRemote")
+    .map(fn(remote) {
+      {
+        remote,
+        branch: metadata.get("deploymentBranch").unwrap_or("master"),
+        directory: metadata.get("deploymentDirectory").unwrap_or(".publish/Git"),
+        commit_message: metadata
+        .get("deploymentCommitMessage")
+        .unwrap_or("Publish deploy"),
+      }
+    })
   Ok({
     site: {
       url,
@@ -53,7 +75,33 @@ pub fn parse_publish_project_configuration(
     section_ids,
     tag_base_path,
     output_directory: metadata.get("output").unwrap_or("Output"),
+    deployment,
   })
+}
+
+///|
+fn project_path_is_absolute(path : String) -> Bool {
+  path.has_prefix("/") ||
+  (path.length() >= 3 && path[1] == ':' && (path[2] == '/' || path[2] == '\\'))
+}
+
+///|
+/// Resolves project-relative deployment settings into the Git helper format.
+pub fn PublishProjectDeployment::git_configuration(
+  self : PublishProjectDeployment,
+  root_directory : String,
+) -> GitDeploymentConfiguration {
+  let working_directory = if project_path_is_absolute(self.directory) {
+    self.directory
+  } else {
+    join_path(root_directory, self.directory)
+  }
+  {
+    remote: self.remote,
+    branch: self.branch,
+    working_directory,
+    commit_message: self.commit_message,
+  }
 }
 
 ///|

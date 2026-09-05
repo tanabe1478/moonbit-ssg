@@ -82,6 +82,35 @@ test "execute the built-in Git deployment only in deploy mode" {
 }
 
 ///|
+test "synchronize deployment output while preserving Git metadata" {
+  let root = "/tmp/moonbit-ssg-deploy-sync-\{@env.now()}"
+  let output = test_join_path(root, "Output")
+  let working = test_join_path(root, "Deployment/Git")
+  test_ensure_directory(output)
+  test_ensure_directory(test_join_path(working, ".git"))
+  @fs.write_string_to_file(test_join_path(output, "index.html"), "new site")
+  @fs.write_string_to_file(test_join_path(working, "obsolete.html"), "old")
+  @fs.write_string_to_file(test_join_path(working, ".git/config"), "metadata")
+  let configuration = @ssg.default_git_deployment_configuration(
+    "git@example.com:site.git", working,
+  )
+  @ssg.sync_git_deployment_output(output, configuration).unwrap()
+  inspect(
+    @fs.path_exists(test_join_path(working, "obsolete.html")),
+    content="false",
+  )
+  inspect(
+    @fs.read_file_to_string(test_join_path(working, "index.html")),
+    content="new site",
+  )
+  inspect(
+    @fs.read_file_to_string(test_join_path(working, ".git/config")),
+    content="metadata",
+  )
+  test_remove_tree(root)
+}
+
+///|
 test "report required Git command failures with command context" {
   let root = "/tmp/moonbit-ssg-deploy-error-\{@env.now()}"
   test_ensure_directory(test_join_path(root, "Output"))

@@ -53,6 +53,8 @@ pub fn deployment_step(String, (PublishingContext) -> Result[PublishingContext, 
 
 pub fn empty_publishing_step() -> PublishingStep
 
+pub fn ensure_git_deployment_working_directory(GitDeploymentConfiguration) -> Result[Unit, String]
+
 pub fn execute_publish_pipeline(PublishingContext, Array[PublishingStep], deploy? : Bool) -> Result[PublishingContext, String]
 
 pub fn foundation_html_factory(PublishSiteConfig, configuration? : FoundationThemeConfiguration) -> PublishHTMLFactory
@@ -130,6 +132,8 @@ pub fn render_tag_details_page(SiteConfig, SiteContent, String) -> String
 pub fn render_tag_list_page(SiteConfig, SiteContent) -> String
 
 pub fn sort_publish_items(PublishedContent, (PublishItem, PublishItem) -> Int, order? : SortOrder, section_id? : String) -> PublishedContent
+
+pub fn sync_git_deployment_output(String, GitDeploymentConfiguration) -> Result[Unit, String]
 
 pub fn version() -> String
 
@@ -314,7 +318,16 @@ pub(all) struct PublishProjectConfiguration {
   section_ids : Array[String]
   tag_base_path : String?
   output_directory : String
+  deployment : PublishProjectDeployment?
 } derive(Eq, @debug.Debug)
+
+pub(all) struct PublishProjectDeployment {
+  remote : String
+  branch : String
+  directory : String
+  commit_message : String
+} derive(Eq, @debug.Debug)
+pub fn PublishProjectDeployment::git_configuration(Self, String) -> GitDeploymentConfiguration
 
 pub(all) struct PublishRSSConfiguration {
   target_path : String
