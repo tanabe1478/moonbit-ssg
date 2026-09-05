@@ -307,3 +307,145 @@ pub fn PublishedContent::items_tagged_with(
   })
   items
 }
+
+///|
+fn publish_source_extension(name : String) -> String? {
+  for extension in [".markdown", ".text", ".md", ".txt"] {
+    if name.has_suffix(extension) {
+      return Some(extension)
+    }
+  }
+  None
+}
+
+///|
+fn source_path_without_extension(path : String, extension : String) -> String {
+  path[:path.length() - extension.length()].to_owned()
+}
+
+///|
+fn collect_markdown_sources(
+  directory : String,
+  relative_directory : String,
+  skip_root_index : Bool,
+) -> Array[PostSource] raise @fs.IOError {
+  let sources : Array[PostSource] = []
+  let names = @fs.read_dir(directory)
+  names.sort_by(compare_unicode_scalars)
+  for name in names {
+    let full_path = join_path(directory, name)
+    let relative_path = if relative_directory.is_empty() {
+      name
+    } else {
+      join_path(relative_directory, name)
+    }
+    if @fs.is_dir(full_path) {
+      sources.push_iter(
+        collect_markdown_sources(full_path, relative_path, false).iter(),
+      )
+      continue
+    }
+    match publish_source_extension(name) {
+      None => ()
+      Some(extension) => {
+        let path = source_path_without_extension(relative_path, extension)
+        if !(skip_root_index && path == "index") {
+          sources.push({
+            slug: path,
+            source: @fs.read_file_to_string(full_path),
+          })
+        }
+      }
+    }
+  }
+  sources
+}
+
+///|
+fn section_index_source(directory : String) -> String? raise @fs.IOError {
+  let names = @fs.read_dir(directory)
+  names.sort_by(compare_unicode_scalars)
+  for name in names {
+    let path = join_path(directory, name)
+    if !@fs.is_dir(path) {
+      match publish_source_extension(name) {
+        Some(extension) =>
+          if source_path_without_extension(name, extension) == "index" {
+            return Some(@fs.read_file_to_string(path))
+          }
+        None => ()
+      }
+    }
+  }
+  None
+}
+
+///|
+fn find_section_id(
+  folder_name : String,
+  section_ids : Array[String],
+) -> String? {
+  let normalized = folder_name.to_lower()
+  for id in section_ids {
+    if id == normalized {
+      return Some(id)
+    }
+  }
+  None
+}
+
+///|
+/// Loads Publish's complete Markdown layout. Recognized root folders become
+/// sections; root files and files below all other folders become pages.
+pub fn load_published_content(
+  content_directory : String,
+  section_ids : Array[String],
+) -> PublishedContent raise @fs.IOError {
+  let index_path = join_path(content_directory, "index.md")
+  let index_source = if @fs.path_exists(index_path) {
+    @fs.read_file_to_string(index_path)
+  } else {
+    ""
+  }
+  let sections : Array[PublishSectionSource] = []
+  for id in section_ids {
+    sections.push({ id, index_source: None, items: [], })
+  }
+  let pages : Array[PublishPageSource] = []
+  let names = @fs.read_dir(content_directory)
+  names.sort_by(compare_unicode_scalars)
+  for name in names {
+    let full_path = join_path(content_directory, name)
+    if @fs.is_dir(full_path) {
+      match find_section_id(name, section_ids) {
+        Some(id) => {
+          let index_source = section_index_source(full_path)
+          let items = collect_markdown_sources(full_path, "", true)
+          for index = 0; index < sections.length(); index = index + 1 {
+            if sections[index].id == id {
+              sections[index] = { id, index_source, items, }
+              break
+            }
+          }
+        }
+        None => {
+          let sources = collect_markdown_sources(full_path, name, false)
+          for source in sources {
+            pages.push({ path: source.slug, source: source.source, })
+          }
+        }
+      }
+      continue
+    }
+    match publish_source_extension(name) {
+      Some(extension) => {
+        let path = source_path_without_extension(name, extension)
+        if path != "index" {
+          pages.push({ path, source: @fs.read_file_to_string(full_path), })
+        }
+      }
+      None => ()
+    }
+  }
+  build_published_content(index_source, sections, pages)
+}

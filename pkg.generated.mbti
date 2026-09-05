@@ -17,6 +17,8 @@ pub fn build_published_content(String, Array[PublishSectionSource], Array[Publis
 
 pub fn build_site_content(String, String, Array[PostSource]) -> SiteContent
 
+pub fn load_published_content(String, Array[String]) -> PublishedContent raise @fs.IOError
+
 pub fn load_site_content(String) -> SiteContent raise @fs.IOError
 
 pub fn parse_source(String) -> SourceDocument
