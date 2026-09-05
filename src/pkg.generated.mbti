@@ -23,6 +23,8 @@ pub fn build_published_content(String, Array[PublishSectionSource], Array[Publis
 
 pub fn build_site_content(String, String, Array[PostSource]) -> SiteContent
 
+pub fn cached_publish_result(String, String, String, String, () -> Result[String, String]) -> Result[PublishCacheValue, String]
+
 pub fn cached_publish_value(String, String, String, String, () -> String) -> PublishCacheValue raise @fs.IOError
 
 pub fn conditional_publishing_step(Bool, PublishingStep) -> PublishingStep
@@ -94,6 +96,10 @@ pub fn[T] publish_predicate_any() -> PublishPredicate[T]
 pub fn publishing_step(String, (PublishingContext) -> Result[PublishingContext, String]) -> PublishingStep
 
 pub fn remove_publish_items(PublishedContent, PublishPredicate[PublishItem], section_id? : String) -> PublishedContent
+
+pub fn render_cached_publish_podcast_feed(String, PublishSiteConfig, PublishedContent, String, BuildDate, PodcastFeedConfiguration, item_predicate? : (PublishItem) -> Bool, step_name? : String) -> Result[PublishCacheValue, String]
+
+pub fn render_cached_publish_rss_feed(String, PublishSiteConfig, PublishedContent, Array[String], BuildDate, configuration? : PublishRSSConfiguration, item_predicate? : (PublishItem) -> Bool, step_name? : String) -> Result[PublishCacheValue, String]
 
 pub fn render_index_page(SiteConfig, SiteContent) -> String
 

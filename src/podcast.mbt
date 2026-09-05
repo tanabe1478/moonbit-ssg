@@ -161,3 +161,40 @@ pub fn render_publish_podcast_feed(
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?><rss version=\"2.0\" xmlns:atom=\"http://www.w3.org/2005/Atom\" xmlns:content=\"http://purl.org/rss/1.0/modules/content/\" xmlns:itunes=\"http://www.itunes.com/dtds/podcast-1.0.dtd\" xmlns:media=\"http://www.rssboard.org/media-rss\"><channel>\{new_feed}<title>\{xml_text(site.name)}</title><description>\{xml_text(configuration.description)}</description><link>\{section_url}</link><language>\{site.language}</language><lastBuildDate>\{built}</lastBuildDate><pubDate>\{built}</pubDate><ttl>\{configuration.ttl}</ttl><atom:link href=\"\{feed_url}\" rel=\"self\" type=\"application/rss+xml\"/><copyright>\{xml_text(configuration.copyright_text)}</copyright><itunes:author>\{xml_text(configuration.author.name)}</itunes:author><itunes:subtitle>\{xml_text(configuration.subtitle)}</itunes:subtitle><itunes:summary>\{xml_text(configuration.description)}</itunes:summary><itunes:explicit>\{podcast_explicit_text(configuration.is_explicit)}</itunes:explicit><itunes:owner><itunes:name>\{xml_text(configuration.author.name)}</itunes:name><itunes:email>\{xml_text(configuration.author.email_address)}</itunes:email></itunes:owner>\{podcast_category(configuration)}<itunes:type>\{podcast_type_text(configuration.podcast_type)}</itunes:type><itunes:image href=\"\{xml_text(configuration.image_url)}\"/>\{rendered_items.join("")}</channel></rss>",
   )
 }
+
+///|
+/// Cached counterpart of `render_publish_podcast_feed`. Validation errors do
+/// not create or replace a cache entry.
+pub fn render_cached_publish_podcast_feed(
+  root_directory : String,
+  site : PublishSiteConfig,
+  content : PublishedContent,
+  section_id : String,
+  build_date : BuildDate,
+  configuration : PodcastFeedConfiguration,
+  item_predicate? : (PublishItem) -> Bool,
+  step_name? : String = "Generate podcast feed",
+) -> Result[PublishCacheValue, String] {
+  let cache_key = match
+    render_publish_podcast_feed(
+      site,
+      content,
+      section_id,
+      publish_cache_build_date(build_date),
+      configuration,
+      item_predicate?,
+    ) {
+    Ok(value) => value
+    Err(error) => return Err(error)
+  }
+  cached_publish_result(root_directory, step_name, "feed", cache_key, fn() {
+    render_publish_podcast_feed(
+      site,
+      content,
+      section_id,
+      build_date,
+      configuration,
+      item_predicate?,
+    )
+  })
+}

@@ -98,6 +98,56 @@ test "render Publish-compatible podcast metadata and enclosure" {
 }
 
 ///|
+test "reuse cached podcast feed until podcast content changes" {
+  let root = "/tmp/moonbit-ssg-podcast-cache-\{@env.now()}"
+  let site : @ssg.PublishSiteConfig = {
+    url: "https://example.com",
+    name: "Example Podcast",
+    description: "Site description",
+    language: "en",
+    image_path: None,
+    favicon_path: None,
+  }
+  let content = podcast_content(
+    "audio.url: https://cdn.example.com/episode.mp3\naudio.duration: 01:02:03\naudio.size: 4567",
+  )
+  let first_date = @ssg.BuildDate::parse("2026-02-03T04:05:06+0000").unwrap()
+  let first = @ssg.render_cached_publish_podcast_feed(
+    root,
+    site,
+    content,
+    "episodes",
+    first_date,
+    podcast_configuration(),
+  ).unwrap()
+  inspect(first.reused, content="false")
+  let later_date = @ssg.BuildDate::parse("2027-03-04T05:06:07+0000").unwrap()
+  let second = @ssg.render_cached_publish_podcast_feed(
+    root,
+    site,
+    content,
+    "episodes",
+    later_date,
+    podcast_configuration(),
+  ).unwrap()
+  inspect(second.reused, content="true")
+  inspect(second.value == first.value, content="true")
+  let changed = @ssg.render_cached_publish_podcast_feed(
+    root,
+    site,
+    podcast_content(
+      "audio.url: https://cdn.example.com/revised.mp3\naudio.duration: 01:02:03\naudio.size: 4567",
+    ),
+    "episodes",
+    later_date,
+    podcast_configuration(),
+  ).unwrap()
+  inspect(changed.reused, content="false")
+  inspect(changed.value.contains("revised.mp3"), content="true")
+  test_remove_tree(root)
+}
+
+///|
 test "report incomplete podcast audio metadata" {
   let date = @ssg.BuildDate::parse("2026-02-03T04:05:06").unwrap()
   let result = @ssg.render_publish_podcast_feed(

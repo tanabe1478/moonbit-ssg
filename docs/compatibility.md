@@ -61,12 +61,11 @@
 - CLIのwebsite `new`、`generate`、`run`（既定port 8000・port指定）
 - `site.md`による汎用site・section・output設定
 - step名で分離した`.publish/Caches`永続cache API
-- CLI生成時のRSS feed cache（設定・contentが不変なら以前のfeedを再利用）
+- RSS / podcast feed cache（設定・contentが不変なら以前のfeedを再利用）
 
 ### 未実装
 
 - CLIの`new plugin`、`deploy`相当
-- podcast feedへの自動cache適用
 
 未実装項目は機能群ごとにtestを先に追加し、既存blogのbyte parityを壊さない形で移行します。
 

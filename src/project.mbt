@@ -150,35 +150,17 @@ fn build_publish_project_inner(
     tag_base_path?=configuration.tag_base_path,
   )
   write_foundation_stylesheet(output_directory)
-  let cache_date : BuildDate = {
-    year: 1970,
-    month: 1,
-    day: 1,
-    hour: 0,
-    minute: 0,
-    second: 0,
-    utc_offset: build_date.utc_offset,
+  let feed = match
+    render_cached_publish_rss_feed(
+      root_directory,
+      configuration.site,
+      content,
+      configuration.section_ids,
+      build_date,
+    ) {
+    Ok(feed) => feed
+    Err(error) => return Err(error)
   }
-  let feed_cache_key = render_publish_rss_feed(
-    configuration.site,
-    content,
-    configuration.section_ids,
-    cache_date,
-  )
-  let feed = cached_publish_value(
-    root_directory,
-    "Generate RSS feed",
-    "feed",
-    feed_cache_key,
-    fn() {
-      render_publish_rss_feed(
-        configuration.site,
-        content,
-        configuration.section_ids,
-        build_date,
-      )
-    },
-  )
   write_output_file(output_directory, "feed.rss", feed.value)
   write_output_file(
     output_directory,

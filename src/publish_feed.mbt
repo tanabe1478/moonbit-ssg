@@ -138,6 +138,43 @@ pub fn render_publish_rss_feed(
 }
 
 ///|
+/// Renders an RSS feed while preserving the previous feed when all inputs
+/// except the build date are unchanged.
+pub fn render_cached_publish_rss_feed(
+  root_directory : String,
+  site : PublishSiteConfig,
+  content : PublishedContent,
+  section_ids : Array[String],
+  build_date : BuildDate,
+  configuration? : PublishRSSConfiguration = default_publish_rss_configuration(),
+  item_predicate? : (PublishItem) -> Bool,
+  step_name? : String = "Generate RSS feed",
+) -> Result[PublishCacheValue, String] {
+  let cache_key = render_publish_rss_feed(
+    site,
+    content,
+    section_ids,
+    publish_cache_build_date(build_date),
+    configuration~,
+    item_predicate?,
+  )
+  Ok(
+    cached_publish_value(root_directory, step_name, "feed", cache_key, fn() {
+      render_publish_rss_feed(
+        site,
+        content,
+        section_ids,
+        build_date,
+        configuration~,
+        item_predicate?,
+      )
+    }),
+  ) catch {
+    @fs.IOError(message) => Err(message)
+  }
+}
+
+///|
 fn publish_last_modified_day(value : String, fallback : String) -> String {
   if value.length() >= 10 {
     value[:10].to_owned()

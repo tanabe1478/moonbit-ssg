@@ -30,7 +30,7 @@ mise exec -- moon run cmd/main -- generate my-site
 mise exec -- moon run cmd/main -- run my-site -p 8000
 ```
 
-`run`はsiteを再生成してからPython標準HTTP serverを起動します。生成された`site.md`でURL、site名、section、tag path、output directoryを設定できます。`.publish/Caches`はstep単位の永続cacheで、変更のないRSS feedを再利用します。
+`run`はsiteを再生成してからPython標準HTTP serverを起動します。生成された`site.md`でURL、site名、section、tag path、output directoryを設定できます。`.publish/Caches`はstep単位の永続cacheで、変更のないfeedを再利用します。libraryからは`render_cached_publish_rss_feed`と`render_cached_publish_podcast_feed`を利用できます。
 
 Markdown本文をPublish互換HTMLへ変換します。
 

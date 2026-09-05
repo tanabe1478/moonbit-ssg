@@ -49,6 +49,19 @@ fn decode_publish_cache(stored : String, key : String) -> String? {
 }
 
 ///|
+fn publish_cache_build_date(build_date : BuildDate) -> BuildDate {
+  {
+    year: 1970,
+    month: 1,
+    day: 1,
+    hour: 0,
+    minute: 0,
+    second: 0,
+    utc_offset: build_date.utc_offset,
+  }
+}
+
+///|
 /// Returns a cache entry scoped by publishing step and name. The producer is
 /// only called when no entry with the same caller-defined key exists.
 pub fn cached_publish_value(
@@ -73,4 +86,46 @@ pub fn cached_publish_value(
   let value = produce()
   @fs.write_string_to_file(path, "\{key.length()}\n\{key}\{value}")
   { value, reused: false, path, }
+}
+
+///|
+fn cached_publish_result_inner(
+  root_directory : String,
+  step_name : String,
+  name : String,
+  key : String,
+  produce : () -> Result[String, String],
+) -> Result[PublishCacheValue, String] raise @fs.IOError {
+  let directory = join_path(
+    join_path(root_directory, ".publish/Caches"),
+    normalized_cache_name(step_name),
+  )
+  ensure_directory(directory)
+  let path = join_path(directory, normalized_cache_name(name))
+  if @fs.path_exists(path) {
+    match decode_publish_cache(@fs.read_file_to_string(path), key) {
+      Some(value) => return Ok({ value, reused: true, path, })
+      None => ()
+    }
+  }
+  let value = match produce() {
+    Ok(value) => value
+    Err(error) => return Err(error)
+  }
+  @fs.write_string_to_file(path, "\{key.length()}\n\{key}\{value}")
+  Ok({ value, reused: false, path, })
+}
+
+///|
+/// `Result`-producing variant used by generators that validate metadata.
+pub fn cached_publish_result(
+  root_directory : String,
+  step_name : String,
+  name : String,
+  key : String,
+  produce : () -> Result[String, String],
+) -> Result[PublishCacheValue, String] {
+  cached_publish_result_inner(root_directory, step_name, name, key, produce) catch {
+    @fs.IOError(message) => Err(message)
+  }
 }
