@@ -10,6 +10,8 @@ pub fn banner() -> String
 
 pub fn parse_source(String) -> SourceDocument
 
+pub fn render_markdown(String) -> String
+
 pub fn version() -> String
 
 // Errors

@@ -1,4 +1,7 @@
 import {
+  "moonbitlang/core/env",
+  "moonbitlang/x/fs",
+  "moonbitlang/x/sys",
   "tanabe1478/moonbit-ssg" @ssg,
 }
 
