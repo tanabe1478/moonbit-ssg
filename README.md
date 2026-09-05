@@ -47,6 +47,15 @@ mise exec -- moon run cmd/main -- deploy my-site
 
 tokenは`site.md`やremote URLへ書かず、SSH agentまたはGit credential managerで管理してください。
 
+既存のMoonBit moduleへplugin packageを追加する場合:
+
+```sh
+mise exec -- moon run cmd/main -- \
+  new plugin path/to/image_optimizer "Image Optimizer"
+```
+
+生成されるpackageは、親moduleの`moon.mod`が`tanabe1478/moonbit-ssg`へ依存していることを前提にします。moduleや架空のregistry dependencyは自動生成しません。
+
 Markdown本文をPublish互換HTMLへ変換します。
 
 ```sh

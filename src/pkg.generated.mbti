@@ -39,6 +39,8 @@ pub fn copy_publish_files_step(String, target_folder? : String, include_folder? 
 
 pub fn copy_publish_theme_resources(String, Array[String], String) -> Unit raise @fs.IOError
 
+pub fn create_publish_plugin_package(String, name? : String) -> Bool raise @fs.IOError
+
 pub fn create_publish_project(String, name? : String, first_post_date? : String) -> Bool raise @fs.IOError
 
 pub fn default_favicon() -> Favicon

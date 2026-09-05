@@ -63,12 +63,13 @@
 - step名で分離した`.publish/Caches`永続cache API
 - RSS / podcast feed cache（設定・contentが不変なら以前のfeedを再利用）
 - CLIのGit `deploy`（生成、永続checkout、branch fallback、output同期、push）
+- CLIの`new plugin` package scaffold
 
-### 未実装
+### 既知の差異
 
-- CLIの`new plugin`相当
+Swift Publishの`new plugin`はSwift Packageとremote dependencyを生成します。MoonBit package managerはregistry外のGit dependencyをmodule manifestへ直接指定できないため、MoonBit版は既存module内へ追加する`moon.pkg`とplugin sourceを生成します。親moduleのdependencyは利用者が明示的に管理します。
 
-未実装項目は機能群ごとにtestを先に追加し、既存blogのbyte parityを壊さない形で移行します。
+今後差異が見つかった場合も、機能群ごとにtestを先に追加し、既存blogのbyte parityを壊さない形で移行します。
 
 ## 互換性の意味
 

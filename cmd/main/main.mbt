@@ -13,7 +13,10 @@ fn print_help() -> Unit {
       #|moonbit-ssg
       #|
       #|Commands:
-      #|  new [DIRECTORY] [NAME]       Create a Foundation website project
+      #|  new [website] [DIRECTORY] [NAME]
+      #|                               Create a Foundation website project
+      #|  new plugin [DIRECTORY] [NAME]
+      #|                               Create a plugin package in a module
       #|  generate [ROOT] [BUILD_DATE] Generate the current generic project
       #|  run [ROOT] [-p PORT]         Generate and serve a generic project
       #|  deploy [ROOT]                Generate and deploy a generic project
@@ -81,6 +84,21 @@ fn create_project(directory : String, name : String?) -> Unit {
     return
   }
   println("Generated website project at \{directory}")
+}
+
+///|
+fn create_plugin_package(directory : String, name : String?) -> Unit {
+  let created = @ssg.create_publish_plugin_package(directory, name?) catch {
+    @fs.IOError(message) => {
+      fail("unable to create plugin package: \{message}")
+      return
+    }
+  }
+  if !created {
+    fail("new plugin directory must be empty: \{directory}")
+    return
+  }
+  println("Generated plugin package at \{directory}")
 }
 
 ///|
@@ -244,6 +262,24 @@ async fn main {
   let args = @env.args()
   if args.length() == 1 {
     print_help()
+    return
+  }
+  if args[1] == "new" &&
+    args.length() >= 3 &&
+    args[2] == "plugin" &&
+    args.length() <= 5 {
+    let directory = if args.length() >= 4 { args[3] } else { "." }
+    let name = if args.length() == 5 { Some(args[4]) } else { None }
+    create_plugin_package(directory, name)
+    return
+  }
+  if args[1] == "new" &&
+    args.length() >= 3 &&
+    args[2] == "website" &&
+    args.length() <= 5 {
+    let directory = if args.length() >= 4 { args[3] } else { "." }
+    let name = if args.length() == 5 { Some(args[4]) } else { None }
+    create_project(directory, name)
     return
   }
   if args[1] == "new" && args.length() >= 2 && args.length() <= 4 {

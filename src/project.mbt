@@ -158,6 +158,56 @@ pub fn create_publish_project(
 }
 
 ///|
+fn plugin_function_name(name : String) -> String {
+  let output : Array[Char] = []
+  let mut separated = false
+  for character in name.to_lower() {
+    if (character >= 'a' && character <= 'z') ||
+      (character >= '0' && character <= '9') {
+      output.push(character)
+      separated = false
+    } else if !output.is_empty() && !separated {
+      output.push('_')
+      separated = true
+    }
+  }
+  if !output.is_empty() && output[output.length() - 1] == '_' {
+    output.pop() |> ignore
+  }
+  if output.is_empty() || (output[0] >= '0' && output[0] <= '9') {
+    "publish_plugin"
+  } else {
+    String::from_array(output)
+  }
+}
+
+///|
+/// Creates a plugin package inside a MoonBit module. The containing module is
+/// responsible for declaring its dependency on `tanabe1478/moonbit-ssg`.
+pub fn create_publish_plugin_package(
+  directory : String,
+  name? : String,
+) -> Bool raise @fs.IOError {
+  if @fs.path_exists(directory) && !@fs.read_dir(directory).is_empty() {
+    return false
+  }
+  ensure_directory(directory)
+  let plugin_name = name.unwrap_or_else(fn() {
+    project_name_from_directory(directory)
+  })
+  let function_name = plugin_function_name(plugin_name)
+  @fs.write_string_to_file(
+    join_path(directory, "moon.pkg"),
+    "import {\n  \"tanabe1478/moonbit-ssg/src\" @ssg,\n}\n",
+  )
+  @fs.write_string_to_file(
+    join_path(directory, "plugin.mbt"),
+    "///|\n/// Installs the \{plugin_name} publishing plugin.\npub fn \{function_name}() -> @ssg.PublishPlugin {\n  @ssg.publish_plugin(\"\{plugin_name}\", fn(context) {\n    // Perform the plugin's work and return the updated context.\n    Ok(context)\n  })\n}\n",
+  )
+  true
+}
+
+///|
 fn build_publish_project_inner(
   root_directory : String,
   build_date : BuildDate,

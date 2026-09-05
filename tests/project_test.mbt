@@ -48,6 +48,38 @@ test "validate required generic project settings" {
 }
 
 ///|
+test "scaffold a plugin package without overwriting files" {
+  let root = "/tmp/moonbit-ssg-plugin-\{@env.now()}"
+  inspect(
+    @ssg.create_publish_plugin_package(root, name="Image Optimizer"),
+    content="true",
+  )
+  inspect(
+    @fs.read_file_to_string(test_join_path(root, "moon.pkg")),
+    content=(
+      #|import {
+      #|  "tanabe1478/moonbit-ssg/src" @ssg,
+      #|}
+      #|
+    ),
+  )
+  let source = @fs.read_file_to_string(test_join_path(root, "plugin.mbt"))
+  inspect(
+    source.contains("pub fn image_optimizer() -> @ssg.PublishPlugin"),
+    content="true",
+  )
+  inspect(
+    source.contains("@ssg.publish_plugin(\"Image Optimizer\""),
+    content="true",
+  )
+  inspect(
+    @ssg.create_publish_plugin_package(root, name="Replacement"),
+    content="false",
+  )
+  test_remove_tree(root)
+}
+
+///|
 test "scaffold and generate a Foundation website project" {
   let root = "/tmp/moonbit-ssg-project-\{@env.now()}"
   inspect(
