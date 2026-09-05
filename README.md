@@ -69,6 +69,35 @@ test "the public API exposes the CLI banner" {
 
 `_test.mbt`はblack-box testです。`inspect`は実際の値を期待する文字列と比較するsnapshot assertionです。
 
+## Publish互換の入力parser
+
+`source.mbt`の`parse_source`は、Markdownをfrontmatterと本文に分けます。
+
+```moonbit
+pub(all) struct SourceDocument {
+  metadata : Metadata
+  item : ItemMetadata
+  markdown : String
+}
+```
+
+- `struct`は複数のfieldを持つデータ型です。
+- `pub(all)`にすると型だけでなくfieldも別packageへ公開されます。
+- `String?`は値がない可能性を表し、`Some(value)`または`None`になります。
+- `match`で`Some`と`None`を漏れなく処理します。
+- `Array[String]`は可変長の文字列配列です。
+
+frontmatterは一般的なYAMLではなく、Publishが内部で使うInkの挙動に合わせています。
+
+- `key: value`形式
+- `tags`はカンマ区切り
+- 空のmetadata valueは無視
+- `:`がない行は直前のvalueへ連結
+- 同じkeyが複数あれば後のvalueを採用
+- 閉じられていないfrontmatterは通常のMarkdownとして保持
+
+この互換性は`source_test.mbt`のblack-box testで固定しています。
+
 ## 移行の検証方針
 
 最終的には同じブログ入力から次の2つを生成します。
