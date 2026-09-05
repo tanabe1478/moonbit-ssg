@@ -36,6 +36,7 @@ fn test_site() -> @moonbit-ssg.SiteContent {
         #|date: 2025-06-07 08:09
         #|description: ""
         #|tags: diary, 技術
+        #|image: /images/post.png
         #|---
         #|# Newer title
       ),
@@ -84,6 +85,16 @@ test "render post detail without custom analytics nodes" {
     ),
   )
   assert_true(html.contains("<meta name=\"description\" content=\"\"\"\"/>"))
+  assert_true(
+    html.contains(
+      "<meta name=\"twitter:card\" content=\"summary_large_image\"/>",
+    ),
+  )
+  assert_true(
+    html.contains(
+      "<meta name=\"twitter:image\" content=\"https://example.com/images/post.png\"/>",
+    ),
+  )
   assert_false(html.contains("googletagmanager"))
   assert_true(
     html.contains(

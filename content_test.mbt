@@ -43,6 +43,7 @@ test "build Publish content model" {
       #|  description: "Older post",
       #|  date: "2024-01-02 03:04",
       #|  tags: ["技術", "diary"],
+      #|  image_path: None,
       #|  body_html: "<h1>Older title</h1><p>Body</p>",
       #|}
     ),

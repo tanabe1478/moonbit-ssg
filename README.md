@@ -13,6 +13,7 @@ mise install
 mise run check
 mise exec -- moon run cmd/main
 mise exec -- moon run cmd/main -- render-markdown ../blog/Content/posts/example.md
+mise exec -- moon run cmd/main -- build ../blog/Content ../blog/Resources ../blog/Output.moonbit
 ```
 
 実行結果:
@@ -32,6 +33,7 @@ moonbit-ssg 0.1.0
 ├── content_test.mbt   # 並び順・title・tagのblack-box test
 ├── markdown.mbt       # Ink互換のMarkdown HTML renderer
 ├── markdown_test.mbt  # Markdown互換性のblack-box test
+├── output.mbt         # Output treeの作成とresource copy
 ├── source.mbt         # frontmatter parserと入力data model
 ├── source_test.mbt    # 入力parserのblack-box test
 ├── theme.mbt          # index・section・post・tag page renderer
@@ -197,6 +199,25 @@ pub fn render_post_page(config : SiteConfig, post : Post) -> String
 - 空文字ではなく文字列`""`のdescriptionは、そのままmeta tagと一覧へ出力
 
 現行siteのindex、section、tag list、tag detail、代表postをbyte単位で比較し、すべてPublish出力との一致を確認しています。
+
+## Outputの生成
+
+`output.mbt`の`write_site_output`は、出力directoryをcleanにしてからHTMLを書き、`Resources`を再帰的にcopyします。themeが指定するstylesheetは、Publishと同様にrootの`styles.css`へもcopyします。
+
+```sh
+mise exec -- moon run cmd/main -- build Content Resources Output.moonbit
+```
+
+引数は順番にContent directory、Resources directory、出力directoryです。現在のCLIのsite設定は、移行対象ブログのSwift `Blog`とthemeの値を明示的に移したものです。将来別siteで使う設定形式を追加するときも、library APIの`SiteConfig`はそのまま利用できます。
+
+filesystem処理では次の再帰関数を分けています。
+
+- `ensure_directory`: 親directoryから順番に作成
+- `remove_tree`: 古い出力を子から削除
+- `copy_tree`: binaryを含むResourcesをbyteのままcopy
+- `write_output_file`: HTMLの親directoryを作って書き込み
+
+現行siteを実際にbuildして比較した結果、RSSとsitemapを除く85ファイルはすべてPublish出力とbyte単位で一致しています。
 
 ## 移行の検証方針
 

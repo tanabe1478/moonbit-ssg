@@ -13,6 +13,7 @@ pub(all) struct Post {
   description : String
   date : String
   tags : Array[String]
+  image_path : String?
   body_html : String
 } derive(Eq, Debug)
 
@@ -53,6 +54,7 @@ fn build_post(post_source : PostSource) -> Post {
     description: document.item.description,
     date: document.item.date.unwrap_or(""),
     tags: document.item.tags,
+    image_path: document.item.image,
     body_html: render_markdown(document.markdown),
   }
 }

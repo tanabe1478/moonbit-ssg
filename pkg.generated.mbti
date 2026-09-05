@@ -29,6 +29,8 @@ pub fn render_tag_list_page(SiteConfig, SiteContent) -> String
 
 pub fn version() -> String
 
+pub fn write_site_output(SiteConfig, String, String, String, theme_stylesheet? : String) -> Unit raise @fs.IOError
+
 // Errors
 
 // Types and methods
@@ -52,6 +54,7 @@ pub(all) struct Post {
   description : String
   date : String
   tags : Array[String]
+  image_path : String?
   body_html : String
 } derive(Eq, @debug.Debug)
 pub fn Post::date_day(Self) -> String

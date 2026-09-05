@@ -69,6 +69,7 @@ fn render_head(
   path : String,
   title : String,
   description : String,
+  image_path : String?,
   custom_nodes : Bool,
 ) -> String {
   let canonical = absolute_url(config, path)
@@ -78,13 +79,20 @@ fn render_head(
   } else {
     description
   }
-  let social_image = absolute_url(config, config.image_path)
+  let social_image = absolute_url(
+    config,
+    image_path.unwrap_or(config.image_path),
+  )
+  let card_type = match image_path {
+    Some(_) => "summary_large_image"
+    None => "summary"
+  }
   let analytics = if custom_nodes && !config.analytics_id.is_empty() {
     "<script async src=\"https://www.googletagmanager.com/gtag/js?id=\{config.analytics_id}\"></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', '\{config.analytics_id}');</script>"
   } else {
     ""
   }
-  "<head><meta charset=\"UTF-8\"/><meta name=\"og:site_name\" content=\"\{config.name}\"/><link rel=\"canonical\" href=\"\{canonical}\"/><meta name=\"twitter:url\" content=\"\{canonical}\"/><meta name=\"og:url\" content=\"\{canonical}\"/><title>\{escape_html(title)}</title><meta name=\"twitter:title\" content=\"\{title}\"/><meta name=\"og:title\" content=\"\{title}\"/><meta name=\"description\" content=\"\{description}\"/><meta name=\"twitter:description\" content=\"\{description}\"/><meta name=\"og:description\" content=\"\{description}\"/><meta name=\"twitter:card\" content=\"summary\"/><link rel=\"stylesheet\" href=\"\{config.stylesheet_path}\" type=\"text/css\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"/><link rel=\"shortcut icon\" href=\"\{config.favicon_path}\" type=\"image/png\"/><link rel=\"alternate\" href=\"\{config.feed_path}\" type=\"application/rss+xml\" title=\"Subscribe to \{config.name}\"/><meta name=\"twitter:image\" content=\"\{social_image}\"/><meta name=\"og:image\" content=\"\{social_image}\"/>\{analytics}</head>"
+  "<head><meta charset=\"UTF-8\"/><meta name=\"og:site_name\" content=\"\{config.name}\"/><link rel=\"canonical\" href=\"\{canonical}\"/><meta name=\"twitter:url\" content=\"\{canonical}\"/><meta name=\"og:url\" content=\"\{canonical}\"/><title>\{escape_html(title)}</title><meta name=\"twitter:title\" content=\"\{title}\"/><meta name=\"og:title\" content=\"\{title}\"/><meta name=\"description\" content=\"\{description}\"/><meta name=\"twitter:description\" content=\"\{description}\"/><meta name=\"og:description\" content=\"\{description}\"/><meta name=\"twitter:card\" content=\"\{card_type}\"/><link rel=\"stylesheet\" href=\"\{config.stylesheet_path}\" type=\"text/css\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"/><link rel=\"shortcut icon\" href=\"\{config.favicon_path}\" type=\"image/png\"/><link rel=\"alternate\" href=\"\{config.feed_path}\" type=\"application/rss+xml\" title=\"Subscribe to \{config.name}\"/><meta name=\"twitter:image\" content=\"\{social_image}\"/><meta name=\"og:image\" content=\"\{social_image}\"/>\{analytics}</head>"
 }
 
 ///|
@@ -105,10 +113,11 @@ fn render_document(
   description : String,
   body : String,
   item_page : Bool,
+  image_path : String?,
   custom_head : Bool,
 ) -> String {
   let body_class = if item_page { " class=\"item-page\"" } else { "" }
-  "<!DOCTYPE html><html lang=\"\{config.language}\">\{render_head(config, path, title, description, custom_head)}<body\{body_class}>\{render_header(config)}\{body}\{render_footer()}</body></html>"
+  "<!DOCTYPE html><html lang=\"\{config.language}\">\{render_head(config, path, title, description, image_path, custom_head)}<body\{body_class}>\{render_header(config)}\{body}\{render_footer()}</body></html>"
 }
 
 ///|
@@ -147,6 +156,7 @@ pub fn render_index_page(config : SiteConfig, site : SiteContent) -> String {
     config.description,
     content,
     false,
+    None,
     true,
   )
 }
@@ -162,6 +172,7 @@ pub fn render_section_page(config : SiteConfig, site : SiteContent) -> String {
     config.description,
     content,
     false,
+    None,
     true,
   )
 }
@@ -177,6 +188,7 @@ pub fn render_post_page(config : SiteConfig, post : Post) -> String {
     post.description,
     content,
     true,
+    post.image_path,
     false,
   )
 }
@@ -191,7 +203,16 @@ pub fn render_tag_list_page(config : SiteConfig, site : SiteContent) -> String {
     )
   }
   let content = "<div class=\"wrapper\"><h1>Browse all tags</h1><ul class=\"all-tags\">\{tags.join("")}</ul></div>"
-  render_document(config, "/tags", "", config.description, content, false, true)
+  render_document(
+    config,
+    "/tags",
+    "",
+    config.description,
+    content,
+    false,
+    None,
+    true,
+  )
 }
 
 ///|
@@ -209,6 +230,7 @@ pub fn render_tag_details_page(
     config.description,
     content,
     false,
+    None,
     true,
   )
 }
