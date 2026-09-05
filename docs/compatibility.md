@@ -58,12 +58,12 @@
 - Foundation stylesheetとresource書き込み
 - Git / GitHub built-in deployment helper
 - shell非依存のcommand runner注入とdeployment gating
-- CLIのwebsite `new`と`generate`
+- CLIのwebsite `new`、`generate`、`run`（既定port 8000・port指定）
 - `site.md`による汎用site・section・output設定
 
 ### 未実装
 
-- CLIの`new plugin`、`run`、`deploy`相当
+- CLIの`new plugin`、`deploy`相当
 - incremental generation cache
 
 未実装項目は機能群ごとにtestを先に追加し、既存blogのbyte parityを壊さない形で移行します。

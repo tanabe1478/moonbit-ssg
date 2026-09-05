@@ -19,4 +19,5 @@ description = "A Publish-compatible static site generator written in MoonBit"
 import {
   "mizchi/markdown@0.8.3",
   "moonbitlang/x@0.4.38",
+  "moonbitlang/async@0.20.3",
 }

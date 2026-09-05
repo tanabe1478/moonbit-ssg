@@ -27,9 +27,10 @@ Foundation themeを使う新しいsite projectを作成し、生成します。
 ```sh
 mise exec -- moon run cmd/main -- new my-site "My Site"
 mise exec -- moon run cmd/main -- generate my-site
+mise exec -- moon run cmd/main -- run my-site -p 8000
 ```
 
-生成された`site.md`でURL、site名、section、tag path、output directoryを設定できます。
+`run`はsiteを再生成してからPython標準HTTP serverを起動します。生成された`site.md`でURL、site名、section、tag path、output directoryを設定できます。
 
 Markdown本文をPublish互換HTMLへ変換します。
 

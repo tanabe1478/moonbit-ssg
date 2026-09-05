@@ -1,5 +1,8 @@
 import {
+  "moonbitlang/async",
+  "moonbitlang/async/process",
   "moonbitlang/core/env",
+  "moonbitlang/core/string",
   "moonbitlang/x/fs",
   "moonbitlang/x/sys",
   "tanabe1478/moonbit-ssg/src" @ssg,

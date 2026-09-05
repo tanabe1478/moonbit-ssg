@@ -15,6 +15,7 @@ fn print_help() -> Unit {
       #|Commands:
       #|  new [DIRECTORY] [NAME]       Create a Foundation website project
       #|  generate [ROOT] [BUILD_DATE] Generate the current generic project
+      #|  run [ROOT] [-p PORT]         Generate and serve a generic project
       #|  render-markdown INPUT        Render one Markdown file
       #|  build CONTENT RESOURCES OUTPUT [BUILD_DATE]
       #|                               Build the tanabe1478/blog-compatible site
@@ -90,6 +91,41 @@ fn generate_project(root : String, build_date : @ssg.BuildDate?) -> Unit {
 }
 
 ///|
+fn parse_port(value : String) -> Int {
+  let port = Some(@string.parse_int(value)) catch { _ => None }
+  match port {
+    Some(port) if port > 0 && port <= 65535 => port
+    _ => {
+      fail("port must be an integer between 1 and 65535")
+      return 8000
+    }
+  }
+}
+
+///|
+async fn run_project(root : String, port : Int) -> Unit {
+  let output = match @ssg.build_publish_project(root) {
+    Ok(output) => output
+    Err(error) => {
+      fail("unable to generate site: \{error}")
+      return
+    }
+  }
+  println("Starting web server at http://localhost:\{port}")
+  println("Press CTRL-C to stop the server")
+  let status = @process.run("python3", [
+    "-m",
+    "http.server",
+    port.to_string(),
+    "--directory",
+    output,
+  ])
+  if status != 0 {
+    fail("web server exited with status \{status}")
+  }
+}
+
+///|
 fn parsed_build_date(value : String) -> @ssg.BuildDate {
   match @ssg.BuildDate::parse(value) {
     Some(date) => date
@@ -101,7 +137,7 @@ fn parsed_build_date(value : String) -> @ssg.BuildDate {
 }
 
 ///|
-fn main {
+async fn main {
   let args = @env.args()
   if args.length() == 1 {
     print_help()
@@ -122,6 +158,24 @@ fn main {
     }
     generate_project(root, build_date)
     return
+  }
+  if args[1] == "run" {
+    if args.length() == 2 {
+      run_project(".", 8000)
+      return
+    }
+    if args.length() == 3 {
+      run_project(args[2], 8000)
+      return
+    }
+    if args.length() == 4 && (args[2] == "-p" || args[2] == "--port") {
+      run_project(".", parse_port(args[3]))
+      return
+    }
+    if args.length() == 5 && (args[3] == "-p" || args[3] == "--port") {
+      run_project(args[2], parse_port(args[4]))
+      return
+    }
   }
   if args.length() == 3 && args[1] == "render-markdown" {
     render_markdown_file(args[2])
