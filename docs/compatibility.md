@@ -42,12 +42,14 @@
 - configurable RSS feed、section選択、item predicate
 - RSS GUID、link、title/body prefix・suffix override
 - 複数section・page対応sitemapとexcluded path
+- Apple Podcasts / Media RSS互換podcast feed
+- podcast author、category、episode、season、explicit metadata
+- audio enclosure、duration、sizeの検証error
 
 ### 未実装
 
 - Predicate、item/page mutation、汎用sort step
 - optional/group/custom stepとplugin installer
-- podcast feed
 - 任意file/folder copy stepとtheme resource set
 - Foundation theme
 - favicon、audio player、hosted/YouTube/Vimeo video player component

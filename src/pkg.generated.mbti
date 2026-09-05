@@ -33,6 +33,8 @@ pub fn render_markdown(String) -> String
 
 pub fn render_post_page(SiteConfig, Post) -> String
 
+pub fn render_publish_podcast_feed(PublishSiteConfig, PublishedContent, String, BuildDate, PodcastFeedConfiguration, item_predicate? : (PublishItem) -> Bool) -> Result[String, String]
+
 pub fn render_publish_rss_feed(PublishSiteConfig, PublishedContent, Array[String], BuildDate, configuration? : PublishRSSConfiguration, item_predicate? : (PublishItem) -> Bool) -> String
 
 pub fn render_publish_sitemap(PublishSiteConfig, PublishedContent, BuildDate, excluded_paths? : Array[String]) -> String
@@ -107,6 +109,32 @@ pub(all) struct Metadata {
 } derive(Eq, @debug.Debug)
 pub fn Metadata::empty() -> Self
 pub fn Metadata::get(Self, String) -> String?
+
+pub(all) struct PodcastAuthor {
+  name : String
+  email_address : String
+} derive(Eq, @debug.Debug)
+
+pub(all) struct PodcastFeedConfiguration {
+  target_path : String
+  ttl : Int
+  maximum_item_count : Int
+  podcast_type : PodcastType
+  image_url : String
+  copyright_text : String
+  author : PodcastAuthor
+  description : String
+  subtitle : String
+  is_explicit : Bool
+  category : String
+  subcategory : String?
+  new_feed_url : String?
+} derive(Eq, @debug.Debug)
+
+pub(all) enum PodcastType {
+  Episodic
+  Serial
+} derive(Eq, @debug.Debug)
 
 pub(all) struct Post {
   slug : String
