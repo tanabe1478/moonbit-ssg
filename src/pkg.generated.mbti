@@ -1,5 +1,5 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "tanabe1478/moonbit-ssg"
+package "tanabe1478/moonbit-ssg/src"
 
 import {
   "moonbitlang/core/debug",

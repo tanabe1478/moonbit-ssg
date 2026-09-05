@@ -10,7 +10,7 @@ test "parse Publish item metadata" {
     #|---
     #|
     #|# Title
-  let document = @moonbit-ssg.parse_source(source)
+  let document = @ssg.parse_source(source)
   debug_inspect(
     document.item,
     content=(
@@ -34,7 +34,7 @@ test "parse Publish item metadata" {
 
 ///|
 test "preserve quoted empty descriptions like Publish" {
-  let document = @moonbit-ssg.parse_source(
+  let document = @ssg.parse_source(
     (
       #|---
       #|date: 2026-04-24 04:09
@@ -49,7 +49,7 @@ test "preserve quoted empty descriptions like Publish" {
 
 ///|
 test "match Ink metadata edge cases" {
-  let document = @moonbit-ssg.parse_source(
+  let document = @ssg.parse_source(
     (
       #|---
       #|a: first
@@ -79,7 +79,7 @@ test "match Ink metadata edge cases" {
 ///|
 test "leave Markdown without valid frontmatter untouched" {
   let source = "---\nnot closed\n# Heading\n"
-  let document = @moonbit-ssg.parse_source(source)
+  let document = @ssg.parse_source(source)
   debug_inspect(document.metadata.entries, content="[]")
   inspect(document.markdown, content="---\nnot closed\n# Heading\n")
 }

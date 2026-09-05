@@ -1,7 +1,7 @@
 ///|
 test "render common Markdown with Ink HTML shape" {
   inspect(
-    @moonbit-ssg.render_markdown(
+    @ssg.render_markdown(
       (
         #|# Hello
         #|
@@ -25,7 +25,7 @@ test "render common Markdown with Ink HTML shape" {
 test "preserve Ink behavior at CRLF boundaries" {
   let source = "# Title\n\n## Section\r\n\r\nBody\r\n\r\n- Item"
   inspect(
-    @moonbit-ssg.render_markdown(source),
+    @ssg.render_markdown(source),
     content="<h1>Title</h1><h2>Section Body - Item</h2>",
   )
 }
@@ -34,7 +34,7 @@ test "preserve Ink behavior at CRLF boundaries" {
 test "finish a standalone CRLF image before the next paragraph" {
   let source = "# Title\n\n![Alt](image.png)\r\n\r\nBody"
   inspect(
-    @moonbit-ssg.render_markdown(source),
+    @ssg.render_markdown(source),
     content="<h1>Title</h1><img src=\"image.png\" alt=\"Alt\"/><p>Body</p>",
   )
 }
@@ -42,7 +42,7 @@ test "finish a standalone CRLF image before the next paragraph" {
 ///|
 test "preserve Ink nested and separated list shapes" {
   inspect(
-    @moonbit-ssg.render_markdown(
+    @ssg.render_markdown(
       (
         #|- Parent
         #|  - Nested
@@ -56,7 +56,7 @@ test "preserve Ink nested and separated list shapes" {
     ),
   )
   inspect(
-    @moonbit-ssg.render_markdown(
+    @ssg.render_markdown(
       (
         #|1. First
         #|   - Child
@@ -74,7 +74,7 @@ test "preserve Ink nested and separated list shapes" {
 ///|
 test "apply the blog YouTube modifier" {
   inspect(
-    @moonbit-ssg.render_markdown("> youtube https://youtu.be/video-id?t=10"),
+    @ssg.render_markdown("> youtube https://youtu.be/video-id?t=10"),
     content=(
       #|<div class="youtube"><iframe width="560" height="315" src="https://www.youtube.com/embed//video-id" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
     ),
@@ -84,7 +84,7 @@ test "apply the blog YouTube modifier" {
 ///|
 test "apply HighlightJS-compatible shell and Swift markup" {
   inspect(
-    @moonbit-ssg.render_markdown(
+    @ssg.render_markdown(
       (
         #|```sh
         #|echo user's value'
@@ -97,7 +97,7 @@ test "apply HighlightJS-compatible shell and Swift markup" {
     ),
   )
   inspect(
-    @moonbit-ssg.render_markdown(
+    @ssg.render_markdown(
       (
         #|```swift
         #|try Blog(value: "text", enabled: true) // comment

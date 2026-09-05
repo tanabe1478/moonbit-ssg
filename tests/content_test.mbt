@@ -1,6 +1,6 @@
 ///|
 test "build Publish content model" {
-  let site = @moonbit-ssg.build_site_content("# Home", "# My posts", [
+  let site = @ssg.build_site_content("# Home", "# My posts", [
     {
       slug: "older",
       source: (
@@ -61,7 +61,7 @@ test "build Publish content model" {
 
 ///|
 test "prefer metadata title and fall back to slug" {
-  let site = @moonbit-ssg.build_site_content("# Home", "# Posts", [
+  let site = @ssg.build_site_content("# Home", "# Posts", [
     {
       slug: "metadata-title",
       source: (

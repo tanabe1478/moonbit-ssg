@@ -1,6 +1,6 @@
 ///|
 test "build generic Publish sections pages and metadata" {
-  let site = @moonbit-ssg.build_published_content(
+  let site = @ssg.build_published_content(
     "# Home",
     [
       {
@@ -75,7 +75,7 @@ test "build generic Publish sections pages and metadata" {
 
 ///|
 test "query tags across multiple Publish sections" {
-  let site = @moonbit-ssg.build_published_content(
+  let site = @ssg.build_published_content(
     "# Home",
     [
       {
