@@ -21,9 +21,31 @@ pub fn build_published_content(String, Array[PublishSectionSource], Array[Publis
 
 pub fn build_site_content(String, String, Array[PostSource]) -> SiteContent
 
+pub fn conditional_publishing_step(Bool, PublishingStep) -> PublishingStep
+
+pub fn copy_publish_file(String, String, target_folder? : String) -> Unit raise @fs.IOError
+
+pub fn copy_publish_file_step(String, target_folder? : String) -> PublishingStep
+
+pub fn copy_publish_files(String, String, target_folder? : String, include_folder? : Bool) -> Unit raise @fs.IOError
+
+pub fn copy_publish_files_step(String, target_folder? : String, include_folder? : Bool) -> PublishingStep
+
+pub fn copy_publish_theme_resources(String, Array[String], String) -> Unit raise @fs.IOError
+
 pub fn default_publish_rss_configuration() -> PublishRSSConfiguration
 
+pub fn deployment_step(String, (PublishingContext) -> Result[PublishingContext, String]) -> PublishingStep
+
+pub fn empty_publishing_step() -> PublishingStep
+
+pub fn execute_publish_pipeline(PublishingContext, Array[PublishingStep], deploy? : Bool) -> Result[PublishingContext, String]
+
 pub fn generate_publish_html(String, PublishedContent, PublishHTMLFactory, file_mode? : HTMLFileMode, tag_base_path? : String) -> Unit raise @fs.IOError
+
+pub fn group_publishing_steps(Array[PublishingStep]) -> PublishingStep
+
+pub fn install_publish_plugin(PublishPlugin) -> PublishingStep
 
 pub fn load_published_content(String, Array[String]) -> PublishedContent raise @fs.IOError
 
@@ -35,11 +57,17 @@ pub fn mutate_publish_items(PublishedContent, PublishPredicate[PublishItem], (Pu
 
 pub fn mutate_publish_pages(PublishedContent, PublishPredicate[PublishPage], (PublishPage) -> Result[PublishPage, String]) -> Result[PublishedContent, String]
 
+pub fn optional_publishing_step(PublishingStep) -> PublishingStep
+
 pub fn parse_source(String) -> SourceDocument
+
+pub fn publish_plugin(String, (PublishingContext) -> Result[PublishingContext, String]) -> PublishPlugin
 
 pub fn[T] publish_predicate((T) -> Bool) -> PublishPredicate[T]
 
 pub fn[T] publish_predicate_any() -> PublishPredicate[T]
+
+pub fn publishing_step(String, (PublishingContext) -> Result[PublishingContext, String]) -> PublishingStep
 
 pub fn remove_publish_items(PublishedContent, PublishPredicate[PublishItem], section_id? : String) -> PublishedContent
 
@@ -201,6 +229,11 @@ pub(all) struct PublishPageSource {
   source : String
 } derive(Eq, @debug.Debug)
 
+pub(all) struct PublishPlugin {
+  name : String
+  installer : (PublishingContext) -> Result[PublishingContext, String]
+}
+
 pub(all) struct PublishPredicate[T] {
   matches : (T) -> Bool
 }
@@ -243,6 +276,26 @@ pub(all) struct PublishedContent {
 pub fn PublishedContent::all_items(Self) -> Array[PublishItem]
 pub fn PublishedContent::all_tags(Self) -> Array[String]
 pub fn PublishedContent::items_tagged_with(Self, String) -> Array[PublishItem]
+
+pub(all) struct PublishingContext {
+  site : PublishSiteConfig
+  content : PublishedContent
+  root_directory : String
+  output_directory : String
+} derive(Eq, @debug.Debug)
+pub fn PublishingContext::with_content(Self, PublishedContent) -> Self
+
+pub(all) struct PublishingStep {
+  name : String
+  kind : PublishingStepKind
+  operation : (PublishingContext, Bool) -> Result[PublishingContext, String]
+}
+
+pub(all) enum PublishingStepKind {
+  SystemStep
+  GenerationStep
+  DeploymentStep
+} derive(Eq, @debug.Debug)
 
 pub(all) struct RSSItemProperties {
   guid : String?

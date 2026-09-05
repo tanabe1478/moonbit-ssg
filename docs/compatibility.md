@@ -48,11 +48,13 @@
 - composable Predicateとinverse / AND / OR
 - item・pageの追加、削除、fallible mutation
 - section指定付きitem sortと昇順・降順
+- empty、group、conditional、optional、custom publishing step
+- plugin installerとgeneration/deployment stepの実行制御
+- 任意file、folder内容、folder自体のcopy step
+- target folder指定とtheme resource set
 
 ### 未実装
 
-- optional/group/custom stepとplugin installer
-- 任意file/folder copy stepとtheme resource set
 - Foundation theme
 - favicon、audio player、hosted/YouTube/Vimeo video player component
 - Git/S3 custom deployment method
