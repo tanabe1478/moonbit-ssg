@@ -9,6 +9,12 @@ import {
 // Values
 pub fn banner() -> String
 
+pub fn build_publish_item(String, String, String) -> PublishItem
+
+pub fn build_publish_page(String, String) -> PublishPage
+
+pub fn build_published_content(String, Array[PublishSectionSource], Array[PublishPageSource]) -> PublishedContent
+
 pub fn build_site_content(String, String, Array[PostSource]) -> SiteContent
 
 pub fn load_site_content(String) -> SiteContent raise @fs.IOError
@@ -38,6 +44,19 @@ pub fn write_site_output(SiteConfig, String, String, String, theme_stylesheet? :
 // Errors
 
 // Types and methods
+pub(all) struct Audio {
+  url : String
+  format : String
+  duration : AudioDuration?
+  byte_size : Int?
+} derive(Eq, @debug.Debug)
+
+pub(all) struct AudioDuration {
+  hours : Int
+  minutes : Int
+  seconds : Int
+} derive(Eq, @debug.Debug)
+
 pub(all) struct BuildDate {
   year : Int
   month : Int
@@ -55,6 +74,17 @@ pub(all) struct ItemMetadata {
   date : String?
   tags : Array[String]
   image : String?
+} derive(Eq, @debug.Debug)
+
+pub(all) struct LocationContent {
+  title : String
+  description : String
+  body_html : String
+  date : String
+  last_modified : String
+  image_path : String?
+  audio : Audio?
+  video : Video?
 } derive(Eq, @debug.Debug)
 
 pub(all) struct Metadata {
@@ -78,6 +108,57 @@ pub fn Post::path(Self) -> String
 pub(all) struct PostSource {
   slug : String
   source : String
+} derive(Eq, @debug.Debug)
+
+pub(all) struct PublishItem {
+  section_id : String
+  relative_path : String
+  metadata : Metadata
+  tags : Array[String]
+  content : LocationContent
+  rss : RSSItemProperties
+} derive(Eq, @debug.Debug)
+pub fn PublishItem::path(Self) -> String
+pub fn PublishItem::rss_title(Self) -> String
+
+pub(all) struct PublishPage {
+  path : String
+  content : LocationContent
+} derive(Eq, @debug.Debug)
+
+pub(all) struct PublishPageSource {
+  path : String
+  source : String
+} derive(Eq, @debug.Debug)
+
+pub(all) struct PublishSection {
+  id : String
+  content : LocationContent
+  items : Array[PublishItem]
+} derive(Eq, @debug.Debug)
+
+pub(all) struct PublishSectionSource {
+  id : String
+  index_source : String?
+  items : Array[PostSource]
+} derive(Eq, @debug.Debug)
+
+pub(all) struct PublishedContent {
+  index : LocationContent
+  sections : Array[PublishSection]
+  pages : Array[PublishPage]
+} derive(Eq, @debug.Debug)
+pub fn PublishedContent::all_items(Self) -> Array[PublishItem]
+pub fn PublishedContent::all_tags(Self) -> Array[String]
+pub fn PublishedContent::items_tagged_with(Self, String) -> Array[PublishItem]
+
+pub(all) struct RSSItemProperties {
+  guid : String?
+  title_prefix : String?
+  title_suffix : String?
+  body_prefix : String?
+  body_suffix : String?
+  link : String?
 } derive(Eq, @debug.Debug)
 
 pub(all) struct SiteConfig {
@@ -107,6 +188,12 @@ pub(all) struct SourceDocument {
   metadata : Metadata
   item : ItemMetadata
   markdown : String
+} derive(Eq, @debug.Debug)
+
+pub(all) enum Video {
+  Hosted(url~ : String, format~ : String)
+  YouTube(id~ : String)
+  Vimeo(id~ : String)
 } derive(Eq, @debug.Debug)
 
 // Type aliases
