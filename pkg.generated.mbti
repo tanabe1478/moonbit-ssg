@@ -17,6 +17,8 @@ pub fn build_published_content(String, Array[PublishSectionSource], Array[Publis
 
 pub fn build_site_content(String, String, Array[PostSource]) -> SiteContent
 
+pub fn generate_publish_html(String, PublishedContent, PublishHTMLFactory, file_mode? : HTMLFileMode, tag_base_path? : String) -> Unit raise @fs.IOError
+
 pub fn load_published_content(String, Array[String]) -> PublishedContent raise @fs.IOError
 
 pub fn load_site_content(String) -> SiteContent raise @fs.IOError
@@ -70,6 +72,11 @@ pub(all) struct BuildDate {
 } derive(Eq, @debug.Debug)
 pub fn BuildDate::parse(String) -> Self?
 
+pub(all) enum HTMLFileMode {
+  StandAloneFiles
+  FoldersAndIndexFiles
+} derive(Eq, @debug.Debug)
+
 pub(all) struct ItemMetadata {
   title : String?
   description : String
@@ -111,6 +118,15 @@ pub(all) struct PostSource {
   slug : String
   source : String
 } derive(Eq, @debug.Debug)
+
+pub(all) struct PublishHTMLFactory {
+  make_index : (LocationContent, PublishedContent) -> String
+  make_section : (PublishSection, PublishedContent) -> String
+  make_item : (PublishItem, PublishedContent) -> String
+  make_page : (PublishPage, PublishedContent) -> String
+  make_tag_list : (Array[String], PublishedContent) -> String?
+  make_tag_details : (String, Array[PublishItem], PublishedContent) -> String?
+}
 
 pub(all) struct PublishItem {
   section_id : String
