@@ -601,6 +601,55 @@ fn normalize_ink_line_endings(source : String) -> String {
 }
 
 ///|
+fn inline_plain_text(inline : @markdown.Inline) -> String {
+  match inline {
+    @markdown.Inline::Text(content~, ..)
+    | @markdown.Inline::Code(content~, ..) => content
+    @markdown.Inline::SoftBreak(..) => " "
+    @markdown.Inline::HardBreak(..) => "\n"
+    @markdown.Inline::Emphasis(children~, ..)
+    | @markdown.Inline::Strong(children~, ..)
+    | @markdown.Inline::Strikethrough(children~, ..)
+    | @markdown.Inline::Link(children~, ..)
+    | @markdown.Inline::RefLink(children~, ..) => inlines_plain_text(children)
+    @markdown.Inline::Image(alt~, ..) | @markdown.Inline::RefImage(alt~, ..) =>
+      alt
+    @markdown.Inline::Autolink(url~, ..) => url
+    @markdown.Inline::WikiLink(target~, label~, ..) =>
+      if label.is_empty() {
+        target
+      } else {
+        label
+      }
+    @markdown.Inline::Directive(label~, ..) => label
+    @markdown.Inline::HtmlInline(..) => ""
+    @markdown.Inline::FootnoteReference(label~, ..) => label
+  }
+}
+
+///|
+fn inlines_plain_text(inlines : Array[@markdown.Inline]) -> String {
+  let parts : Array[String] = []
+  for inline in inlines {
+    parts.push(inline_plain_text(inline))
+  }
+  parts.join("")
+}
+
+///|
+fn markdown_title(source : String) -> String? {
+  let document = @markdown.parse(normalize_ink_line_endings(source)).document
+  for block in document.children {
+    match block {
+      @markdown.Block::Heading(level=1, children~, ..) =>
+        return Some(inlines_plain_text(children).trim().to_owned())
+      _ => ()
+    }
+  }
+  None
+}
+
+///|
 /// Renders Markdown using Ink-compatible HTML serialization.
 pub fn render_markdown(source : String) -> String {
   // Ink compares line terminators with a literal LF in a few readers. Keep

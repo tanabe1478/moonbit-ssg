@@ -1,3 +1,4 @@
 import {
   "mizchi/markdown",
+  "moonbitlang/x/fs",
 }

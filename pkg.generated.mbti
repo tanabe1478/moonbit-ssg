@@ -3,10 +3,15 @@ package "tanabe1478/moonbit-ssg"
 
 import {
   "moonbitlang/core/debug",
+  "moonbitlang/x/fs",
 }
 
 // Values
 pub fn banner() -> String
+
+pub fn build_site_content(String, String, Array[PostSource]) -> SiteContent
+
+pub fn load_site_content(String) -> SiteContent raise @fs.IOError
 
 pub fn parse_source(String) -> SourceDocument
 
@@ -30,6 +35,31 @@ pub(all) struct Metadata {
 } derive(Eq, @debug.Debug)
 pub fn Metadata::empty() -> Self
 pub fn Metadata::get(Self, String) -> String?
+
+pub(all) struct Post {
+  slug : String
+  title : String
+  description : String
+  date : String
+  tags : Array[String]
+  body_html : String
+} derive(Eq, @debug.Debug)
+pub fn Post::date_day(Self) -> String
+pub fn Post::path(Self) -> String
+
+pub(all) struct PostSource {
+  slug : String
+  source : String
+} derive(Eq, @debug.Debug)
+
+pub(all) struct SiteContent {
+  index_title : String
+  section_title : String
+  posts : Array[Post]
+} derive(Eq, @debug.Debug)
+pub fn SiteContent::all_tags(Self) -> Array[String]
+pub fn SiteContent::posts_by_descending_date(Self) -> Array[Post]
+pub fn SiteContent::posts_tagged_with(Self, String) -> Array[Post]
 
 pub(all) struct SourceDocument {
   metadata : Metadata
