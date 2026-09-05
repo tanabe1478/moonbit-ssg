@@ -7,6 +7,7 @@ pub(all) struct BuildDate {
   hour : Int
   minute : Int
   second : Int
+  utc_offset : String
 } derive(Eq, Debug)
 
 ///|
@@ -17,9 +18,9 @@ fn parse_number(value : StringView) -> Int? {
 }
 
 ///|
-/// Parses `yyyy-MM-ddTHH:mm:ss` in the blog's Asia/Tokyo timezone.
+/// Parses `yyyy-MM-ddTHH:mm:ss` with an optional `+HHMM` UTC offset.
 pub fn BuildDate::parse(value : String) -> BuildDate? {
-  if value.length() != 19 ||
+  if (value.length() != 19 && value.length() != 24) ||
     value[4] != '-' ||
     value[7] != '-' ||
     value[10] != 'T' ||
@@ -36,8 +37,18 @@ pub fn BuildDate::parse(value : String) -> BuildDate? {
       parse_number(value[14:16]),
       parse_number(value[17:19]),
     ) {
-    (Some(year), Some(month), Some(day), Some(hour), Some(minute), Some(second)) =>
-      Some({ year, month, day, hour, minute, second, })
+    (Some(year), Some(month), Some(day), Some(hour), Some(minute), Some(second)) => {
+      let utc_offset = if value.length() == 24 {
+        value[19:24].to_owned()
+      } else {
+        "+0900"
+      }
+      if utc_offset.length() != 5 ||
+        (utc_offset[0] != '+' && utc_offset[0] != '-') {
+        return None
+      }
+      Some({ year, month, day, hour, minute, second, utc_offset, })
+    }
     _ => None
   }
 }
@@ -58,6 +69,7 @@ fn current_build_date() -> BuildDate {
     hour: date.hour(),
     minute: date.minute(),
     second: date.second(),
+    utc_offset: "+0900",
   }
 }
 
@@ -106,12 +118,12 @@ fn two_digits(value : Int) -> String {
 
 ///|
 fn rfc822_date(date : BuildDate) -> String {
-  "\{weekday_name(date.year, date.month, date.day)}, \{date.day} \{month_name(date.month)} \{date.year} \{two_digits(date.hour)}:\{two_digits(date.minute)}:\{two_digits(date.second)} +0900"
+  "\{weekday_name(date.year, date.month, date.day)}, \{date.day} \{month_name(date.month)} \{date.year} \{two_digits(date.hour)}:\{two_digits(date.minute)}:\{two_digits(date.second)} \{date.utc_offset}"
 }
 
 ///|
-fn post_build_date(post : Post) -> BuildDate {
-  let value = post.date.replace_all(old=" ", new="T") + ":00"
+fn post_build_date(post : Post, utc_offset : String) -> BuildDate {
+  let value = post.date.replace_all(old=" ", new="T") + ":00" + utc_offset
   BuildDate::parse(value).unwrap_or({
     year: 1970,
     month: 1,
@@ -119,6 +131,7 @@ fn post_build_date(post : Post) -> BuildDate {
     hour: 0,
     minute: 0,
     second: 0,
+    utc_offset,
   })
 }
 
@@ -148,7 +161,7 @@ pub fn render_rss_feed(
     let post = posts[index]
     let url = absolute_url(config, post.path())
     items.push(
-      "<item><guid isPermaLink=\"true\">\{url}</guid><title>\{xml_text(post.title)}</title><description>\{xml_text(post.description)}</description><link>\{url}</link><pubDate>\{rfc822_date(post_build_date(post))}</pubDate><content:encoded><![CDATA[\{rss_body(config, post.body_html)}]]></content:encoded></item>",
+      "<item><guid isPermaLink=\"true\">\{url}</guid><title>\{xml_text(post.title)}</title><description>\{xml_text(post.description)}</description><link>\{url}</link><pubDate>\{rfc822_date(post_build_date(post, build_date.utc_offset))}</pubDate><content:encoded><![CDATA[\{rss_body(config, post.body_html)}]]></content:encoded></item>",
     )
   }
   let built = rfc822_date(build_date)

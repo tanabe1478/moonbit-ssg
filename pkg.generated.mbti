@@ -45,6 +45,7 @@ pub(all) struct BuildDate {
   hour : Int
   minute : Int
   second : Int
+  utc_offset : String
 } derive(Eq, @debug.Debug)
 pub fn BuildDate::parse(String) -> Self?
 

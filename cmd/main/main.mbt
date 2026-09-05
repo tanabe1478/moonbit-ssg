@@ -68,7 +68,8 @@ fn main {
   if args.length() == 6 && args[1] == "build" {
     match @ssg.BuildDate::parse(args[5]) {
       Some(date) => build_site(args[2], args[3], args[4], Some(date))
-      None => fail("build date must use yyyy-MM-ddTHH:mm:ss")
+      None =>
+        fail("build date must use yyyy-MM-ddTHH:mm:ss with optional +HHMM")
     }
     return
   }
