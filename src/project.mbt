@@ -87,6 +87,10 @@ pub fn create_publish_project(
     "\{now.year}-\{two_digits(now.month)}-\{two_digits(now.day)} \{two_digits(now.hour)}:\{two_digits(now.minute)}"
   })
   @fs.write_string_to_file(
+    join_path(directory, ".gitignore"),
+    ".DS_Store\n.publish\nOutput\n",
+  )
+  @fs.write_string_to_file(
     join_path(directory, "site.md"),
     "---\nurl: https://your-website-url.com\nname: \{project_name}\ndescription: A description of \{project_name}\nlanguage: en\nsections: posts\nfavicon: images/favicon.png\ntagPath: tags\noutput: Output\n---",
   )
@@ -146,16 +150,36 @@ fn build_publish_project_inner(
     tag_base_path?=configuration.tag_base_path,
   )
   write_foundation_stylesheet(output_directory)
-  write_output_file(
-    output_directory,
-    "feed.rss",
-    render_publish_rss_feed(
-      configuration.site,
-      content,
-      configuration.section_ids,
-      build_date,
-    ),
+  let cache_date : BuildDate = {
+    year: 1970,
+    month: 1,
+    day: 1,
+    hour: 0,
+    minute: 0,
+    second: 0,
+    utc_offset: build_date.utc_offset,
+  }
+  let feed_cache_key = render_publish_rss_feed(
+    configuration.site,
+    content,
+    configuration.section_ids,
+    cache_date,
   )
+  let feed = cached_publish_value(
+    root_directory,
+    "Generate RSS feed",
+    "feed",
+    feed_cache_key,
+    fn() {
+      render_publish_rss_feed(
+        configuration.site,
+        content,
+        configuration.section_ids,
+        build_date,
+      )
+    },
+  )
+  write_output_file(output_directory, "feed.rss", feed.value)
   write_output_file(
     output_directory,
     "sitemap.xml",

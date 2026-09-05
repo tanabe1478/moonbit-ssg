@@ -52,6 +52,10 @@ test "scaffold and generate a Foundation website project" {
     @ssg.create_publish_project(root, name="Do not overwrite"),
     content="false",
   )
+  inspect(
+    @fs.read_file_to_string(test_join_path(root, ".gitignore")),
+    content=".DS_Store\n.publish\nOutput\n",
+  )
   let date = @ssg.BuildDate::parse("2026-09-05T12:35:00+0900").unwrap()
   let output = @ssg.build_publish_project(root, build_date=date).unwrap()
   inspect(output, content="\{root}/Output")
@@ -67,6 +71,18 @@ test "scaffold and generate a Foundation website project" {
     content="true",
   )
   inspect(@fs.path_exists(test_join_path(output, "feed.rss")), content="true")
+  let first_feed = @fs.read_file_to_string(test_join_path(output, "feed.rss"))
+  let later_date = @ssg.BuildDate::parse("2027-01-01T00:00:00+0900").unwrap()
+  ignore(@ssg.build_publish_project(root, build_date=later_date).unwrap())
+  let reused_feed = @fs.read_file_to_string(test_join_path(output, "feed.rss"))
+  inspect(reused_feed == first_feed, content="true")
+  let post_path = test_join_path(root, "Content/posts/first-post.md")
+  let post = @fs.read_file_to_string(post_path)
+  @fs.write_string_to_file(post_path, post + "\nUpdated after caching.")
+  ignore(@ssg.build_publish_project(root, build_date=later_date).unwrap())
+  let updated_feed = @fs.read_file_to_string(test_join_path(output, "feed.rss"))
+  inspect(updated_feed == first_feed, content="false")
+  inspect(updated_feed.contains("Updated after caching."), content="true")
   inspect(
     @fs.path_exists(test_join_path(output, "sitemap.xml")),
     content="true",

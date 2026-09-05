@@ -23,6 +23,8 @@ pub fn build_published_content(String, Array[PublishSectionSource], Array[Publis
 
 pub fn build_site_content(String, String, Array[PostSource]) -> SiteContent
 
+pub fn cached_publish_value(String, String, String, String, () -> String) -> PublishCacheValue raise @fs.IOError
+
 pub fn conditional_publishing_step(Bool, PublishingStep) -> PublishingStep
 
 pub fn copy_publish_file(String, String, target_folder? : String) -> Unit raise @fs.IOError
@@ -251,6 +253,12 @@ pub fn Post::path(Self) -> String
 pub(all) struct PostSource {
   slug : String
   source : String
+} derive(Eq, @debug.Debug)
+
+pub(all) struct PublishCacheValue {
+  value : String
+  reused : Bool
+  path : String
 } derive(Eq, @debug.Debug)
 
 pub(all) struct PublishHTMLFactory {
