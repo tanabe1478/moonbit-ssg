@@ -21,7 +21,11 @@ pub fn render_markdown(String) -> String
 
 pub fn render_post_page(SiteConfig, Post) -> String
 
+pub fn render_rss_feed(SiteConfig, SiteContent, BuildDate) -> String
+
 pub fn render_section_page(SiteConfig, SiteContent) -> String
+
+pub fn render_sitemap(SiteConfig, SiteContent, BuildDate) -> String
 
 pub fn render_tag_details_page(SiteConfig, SiteContent, String) -> String
 
@@ -29,11 +33,21 @@ pub fn render_tag_list_page(SiteConfig, SiteContent) -> String
 
 pub fn version() -> String
 
-pub fn write_site_output(SiteConfig, String, String, String, theme_stylesheet? : String) -> Unit raise @fs.IOError
+pub fn write_site_output(SiteConfig, String, String, String, theme_stylesheet? : String, build_date? : BuildDate) -> Unit raise @fs.IOError
 
 // Errors
 
 // Types and methods
+pub(all) struct BuildDate {
+  year : Int
+  month : Int
+  day : Int
+  hour : Int
+  minute : Int
+  second : Int
+} derive(Eq, @debug.Debug)
+pub fn BuildDate::parse(String) -> Self?
+
 pub(all) struct ItemMetadata {
   title : String?
   description : String

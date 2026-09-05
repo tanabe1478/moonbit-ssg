@@ -88,8 +88,10 @@ pub fn write_site_output(
   resources_directory : String,
   output_directory : String,
   theme_stylesheet? : String = "MyHtmlTheme/styles.css",
+  build_date? : BuildDate,
 ) -> Unit raise @fs.IOError {
   let site = load_site_content(content_directory)
+  let build_date = build_date.unwrap_or_else(current_build_date)
   remove_tree(output_directory)
   ensure_directory(output_directory)
   write_output_file(
@@ -121,6 +123,16 @@ pub fn write_site_output(
       render_tag_details_page(config, site, tag),
     )
   }
+  write_output_file(
+    output_directory,
+    "feed.rss",
+    render_rss_feed(config, site, build_date),
+  )
+  write_output_file(
+    output_directory,
+    "sitemap.xml",
+    render_sitemap(config, site, build_date),
+  )
   copy_tree(resources_directory, output_directory)
   copy_tree(
     join_path(resources_directory, theme_stylesheet),

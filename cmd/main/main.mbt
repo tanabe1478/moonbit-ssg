@@ -35,8 +35,13 @@ fn render_markdown_file(path : String) -> Unit {
 }
 
 ///|
-fn build_site(content : String, resources : String, output : String) -> Unit {
-  @ssg.write_site_output(blog_config(), content, resources, output) catch {
+fn build_site(
+  content : String,
+  resources : String,
+  output : String,
+  build_date : @ssg.BuildDate?,
+) -> Unit {
+  @ssg.write_site_output(blog_config(), content, resources, output, build_date?) catch {
     @fs.IOError(message) => {
       fail("unable to build site: \{message}")
       return
@@ -57,10 +62,17 @@ fn main {
     return
   }
   if args.length() == 5 && args[1] == "build" {
-    build_site(args[2], args[3], args[4])
+    build_site(args[2], args[3], args[4], None)
+    return
+  }
+  if args.length() == 6 && args[1] == "build" {
+    match @ssg.BuildDate::parse(args[5]) {
+      Some(date) => build_site(args[2], args[3], args[4], Some(date))
+      None => fail("build date must use yyyy-MM-ddTHH:mm:ss")
+    }
     return
   }
   fail(
-    "usage: moonbit-ssg [render-markdown INPUT | build CONTENT RESOURCES OUTPUT]",
+    "usage: moonbit-ssg [render-markdown INPUT | build CONTENT RESOURCES OUTPUT [BUILD_DATE]]",
   )
 }

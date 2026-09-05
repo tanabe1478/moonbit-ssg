@@ -2,7 +2,7 @@
 
 Publish互換を目標にした、MoonBit製の静的サイトジェネレーターです。
 
-Swift Publishによる既存サイトを正解として、生成結果を比較しながら段階的に機能を追加しています。現在はfrontmatter解析、現行43記事で一致するMarkdown変換、Content directoryからのsite model構築、Publish互換themeのHTML生成まで実装済みです。
+Swift Publishによる既存サイトを正解として、生成結果を比較しながら実装しています。frontmatter、Markdown、site model、theme、resource copy、RSS、sitemapまで、現行Publish pipelineの生成機能を実装済みです。
 
 ## 開発環境
 
@@ -14,6 +14,8 @@ mise run check
 mise exec -- moon run cmd/main
 mise exec -- moon run cmd/main -- render-markdown ../blog/Content/posts/example.md
 mise exec -- moon run cmd/main -- build ../blog/Content ../blog/Resources ../blog/Output.moonbit
+# byte比較でbuild時刻を固定する場合
+mise exec -- moon run cmd/main -- build ../blog/Content ../blog/Resources ../blog/Output.moonbit 2026-09-05T13:44:37
 ```
 
 実行結果:
@@ -31,6 +33,8 @@ moonbit-ssg 0.1.0
 ├── cmd/main/          # CLIの実行可能package
 ├── content.mbt        # Content directory loaderとsite model
 ├── content_test.mbt   # 並び順・title・tagのblack-box test
+├── feed.mbt           # RSSとsitemap renderer、build日時
+├── feed_test.mbt      # XMLと日付formatのblack-box test
 ├── markdown.mbt       # Ink互換のMarkdown HTML renderer
 ├── markdown_test.mbt  # Markdown互換性のblack-box test
 ├── output.mbt         # Output treeの作成とresource copy
@@ -217,7 +221,34 @@ filesystem処理では次の再帰関数を分けています。
 - `copy_tree`: binaryを含むResourcesをbyteのままcopy
 - `write_output_file`: HTMLの親directoryを作って書き込み
 
-現行siteを実際にbuildして比較した結果、RSSとsitemapを除く85ファイルはすべてPublish出力とbyte単位で一致しています。
+## RSSとsitemap
+
+`feed.mbt`はPublishとPlotの既定設定に合わせてRSS 2.0とsitemap XMLを生成します。
+
+- RSSは記事を日付降順にして最大100件出力
+- RSS内のroot-relative URLはsiteのabsolute URLへ変換
+- 記事日時はAsia/TokyoのRFC 822形式
+- sitemapはposts sectionと全記事を出力
+- RSSのbuild日時とsitemapの`lastmod`は同じ`BuildDate`を利用
+
+通常のbuildでは現在時刻を使います。比較時は任意のbuild日時を`yyyy-MM-ddTHH:mm:ss`でCLIの最後へ渡せます。時刻を値として注入する設計にしたため、testは現在時刻に依存せず決定的です。
+
+```moonbit
+pub fn write_site_output(
+  config : SiteConfig,
+  content_directory : String,
+  resources_directory : String,
+  output_directory : String,
+  theme_stylesheet? : String = "MyHtmlTheme/styles.css",
+  build_date? : BuildDate,
+) -> Unit raise @fs.IOError
+```
+
+- `引数? : T`は省略可能なoptional引数です。
+- 呼び出し側で`build_date?`と書くと、`T?`をoptional引数へそのまま転送できます。
+- build日時を省略した場合だけ`current_build_date`を評価します。
+
+現行siteを固定build日時で実際に生成し、Publishの`Output`と比較した結果、全87ファイルがbyte単位で一致しています。
 
 ## 移行の検証方針
 
