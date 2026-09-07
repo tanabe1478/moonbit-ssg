@@ -6,6 +6,12 @@ This document compares moonbit-ssg with common content-oriented static site gene
 
 The target is a practical blog and documentation SSG. It is not intended to become a JavaScript application framework or to reproduce every feature of every compared project.
 
+## Compatibility policy
+
+The compatibility boundary is generated behavior, not repository layout or API stability. HTML, public URLs, feeds, sitemap entries, resources, and browser-visible behavior should remain equivalent unless a change is intentional. Before 1.0, library APIs, `site.md`, CLI arguments, internal models, and the blog repository may change when doing so removes duplication or improves the general design.
+
+Changes that affect the production blog should update `tanabe1478/blog` in the same work sequence and verify its generated output and public smoke checks. A site-specific adapter is transitional, not a permanent architecture constraint.
+
 ## Reference projects
 
 The comparison uses the public documentation of established generators:
@@ -88,7 +94,7 @@ Add generic content metadata and build policy for:
 
 Why first: accidentally publishing drafts or failing to publish without an understandable error is a correctness problem, not an optional convenience.
 
-Compatibility constraint: the `tanabe1478/blog` adapter must keep its current behavior. The generic project path gets the new policy independently.
+Output constraint: publication controls must not accidentally remove currently public blog content. The blog's configuration or source may be updated to opt into intentional future-dated content; the adapter API itself does not need to remain unchanged.
 
 #### 2. Project-local layouts and partials
 
@@ -161,7 +167,7 @@ These are better handled by plugins or external build tools unless a concrete Mo
 
 “Excessive” does not mean “remove now.” These features are useful and tested, but they are not prerequisites for a minimal general-purpose SSG:
 
-1. **`tanabe1478/blog` byte-compatibility adapter** — valuable migration evidence, but site-specific.
+1. **`tanabe1478/blog` byte-compatibility adapter** — valuable migration evidence, but transitional and site-specific. Remove it after the generic configuration/theme path can reproduce the public output.
 2. **Podcast and rich media support** — uncommon in a minimal core.
 3. **Git/GitHub deployment implementation** — many SSGs leave deployment to CI or plugins.
 4. **Handwritten shell and Swift highlighting compatibility** — narrow and migration-driven.
@@ -169,7 +175,8 @@ These are better handled by plugins or external build tools unless a concrete Mo
 
 Near-term policy:
 
-- keep all of them stable;
+- keep generated behavior stable while replacement paths are introduced;
+- remove site-specific APIs once the blog has migrated to generic APIs;
 - do not let compatibility behavior become the default generic behavior;
 - document boundaries;
 - consider subpackages only when MoonBit package dependencies can remain acyclic and the public API is mature.
@@ -181,11 +188,12 @@ Near-term policy:
 3. **Pure pagination model**
 4. **Template engine evaluation and design note**
 5. **Project-local layouts/partials prototype**
-6. **Watch/rebuild loop**
-7. **Aliases, 404, robots, and collision checks**
-8. **Taxonomies and data files**
-9. **Highlighting and image pipeline decisions**
-10. **Page-level incremental cache**
+6. **Migrate `tanabe1478/blog` to generic configuration and remove its adapter**
+7. **Watch/rebuild loop**
+8. **Aliases, 404, robots, and collision checks**
+9. **Taxonomies and data files**
+10. **Highlighting and image pipeline decisions**
+11. **Page-level incremental cache**
 
 The order separates pure models from I/O and avoids building an incremental cache before template dependencies are known.
 
@@ -209,7 +217,7 @@ Acceptance criteria:
 4. Preview flags can include each category independently.
 5. Excluded items do not appear in sections, tags, RSS, podcast feeds, or sitemap.
 6. Invalid dates report the source path and field.
-7. The blog compatibility `build` command remains unchanged.
+7. The blog may change configuration or metadata, but its intended public output remains present.
 8. Existing generic behavior changes are documented as a pre-1.0 safety correction.
 
 ## Decision points before larger work

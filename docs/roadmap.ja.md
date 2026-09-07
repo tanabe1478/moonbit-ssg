@@ -6,6 +6,12 @@
 
 対象は実用的なblog・documentation用SSGです。JavaScript application frameworkになることや、比較対象すべての機能を再実装することは目標にしません。
 
+## 互換性方針
+
+互換性の境界はrepository構成やAPIの維持ではなく、生成結果です。HTML、公開URL、feed、sitemap entry、resource、browserから見える挙動は、意図した変更でない限り同等に保ちます。1.0以前は、重複を除いて汎用設計を改善できるなら、library API、`site.md`、CLI引数、内部model、blog repositoryを変更できます。
+
+本番blogへ影響する変更は、同じ作業の流れで`tanabe1478/blog`側も更新し、生成結果とpublic smoke checkを確認します。site固有adapterは移行用であり、永続的なarchitecture制約にはしません。
+
 ## 比較対象
 
 成熟したSSGの公式documentを参照しました。
@@ -88,7 +94,7 @@ Status:
 
 最優先の理由: 下書きの誤公開と、原因が分からないbuild失敗は便利機能ではなく正しさの問題です。
 
-互換条件: `tanabe1478/blog` adapterの現在の挙動は変えません。新policyは汎用project経路へ独立して適用します。
+出力条件: 公開制御によって現在公開中のblog contentを意図せず消してはいけません。意図的な未来日付記事はblog側の設定やmetadataを更新して許可できます。adapter API自体を維持する必要はありません。
 
 #### 2. Project local layoutとpartial
 
@@ -161,7 +167,7 @@ live reloadより、まず信頼できるrebuildを優先します。
 
 「過剰」は今すぐ削除する意味ではありません。便利でtest済みですが、最小の汎用SSG coreには必須でない機能です。
 
-1. **`tanabe1478/blog` byte互換adapter** — 移行実績として有用だがsite固有。
+1. **`tanabe1478/blog` byte互換adapter** — 移行実績として有用ですが、site固有の一時的な層です。汎用設定/themeで公開結果を再現できたら削除します。
 2. **Podcast・rich media** — 最小coreでは一般的でない。
 3. **Git/GitHub deployment実装** — CI/pluginへ任せるSSGも多い。
 4. **手書きshell/Swift highlight互換** — 対象が狭く移行由来。
@@ -169,7 +175,8 @@ live reloadより、まず信頼できるrebuildを優先します。
 
 当面の方針:
 
-- すべて安定して維持する。
+- 置き換え経路を用意する間は生成結果を安定させる。
+- blogを汎用APIへ移行した後、site固有APIを削除する。
 - 互換挙動を汎用defaultへ漏らさない。
 - 境界をdocument化する。
 - MoonBit package依存をacyclicに保ち、公開APIが成熟した段階だけsubpackage化を検討する。
@@ -181,11 +188,12 @@ live reloadより、まず信頼できるrebuildを優先します。
 3. **純粋なpagination model**
 4. **template engine調査とdesign note**
 5. **project local layout/partial prototype**
-6. **watch/rebuild loop**
-7. **alias、404、robots、collision check**
-8. **taxonomyとdata file**
-9. **highlightとimage pipeline判断**
-10. **page単位incremental cache**
+6. **`tanabe1478/blog`を汎用設定へ移行し、専用adapterを削除**
+7. **watch/rebuild loop**
+8. **alias、404、robots、collision check**
+9. **taxonomyとdata file**
+10. **highlightとimage pipeline判断**
+11. **page単位incremental cache**
 
 純粋modelをI/Oより先に作り、template依存が決まる前にincremental cacheを作らない順序です。
 
@@ -209,7 +217,7 @@ API/model案:
 4. preview flagで各categoryを独立して含められる。
 5. 除外itemはsection、tag、RSS、podcast、sitemapのすべてに出ない。
 6. 不正dateはsource pathとfieldを含むerrorを返す。
-7. blog互換`build` commandの挙動は変えない。
+7. blog側の設定やmetadataは変更してよいが、意図した公開contentは維持する。
 8. 既存汎用挙動の変更をpre-1.0の安全性修正としてdocument化する。
 
 ## 大きな実装前に決めること
