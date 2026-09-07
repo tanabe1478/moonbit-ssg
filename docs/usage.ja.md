@@ -114,6 +114,14 @@ Article body.
 
 `title`、`date`、`lastModified`、`description`、`tags`、`path`、`image`、RSS override、audio/video、podcast metadataに対応しています。実装済み機能は[Publish互換範囲](compatibility.ja.md)を参照してください。
 
+YouTubeを埋め込むにはblockquote modifierを使います。
+
+```markdown
+> youtube https://www.youtube.com/watch?v=VIDEO_ID&t=1m55s&list=PLAYLIST_ID
+```
+
+rendererは`v`をembed pathへ移し、`t`をembed APIの秒数指定`start`へ変換し、その他のquery parameterを維持します。短縮`youtu.be` URLにも対応します。
+
 ## 5. 生成・previewする
 
 ```sh

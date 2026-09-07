@@ -114,6 +114,14 @@ Article body.
 
 Supported metadata includes `title`, `date`, `lastModified`, `description`, `tags`, `path`, `image`, RSS overrides, audio/video fields, and podcast fields. See [Publish compatibility](compatibility.md) for the implemented capability list.
 
+Use a blockquote modifier to embed YouTube:
+
+```markdown
+> youtube https://www.youtube.com/watch?v=VIDEO_ID&t=1m55s&list=PLAYLIST_ID
+```
+
+The renderer moves `v` into the embed path, converts `t` to the embed API's `start` parameter in seconds, and preserves other query parameters. Short `youtu.be` URLs are supported as well.
+
 ## 5. Generate and preview
 
 ```sh

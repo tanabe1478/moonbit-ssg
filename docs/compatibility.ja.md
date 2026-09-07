@@ -12,7 +12,7 @@
 
 - Ink互換frontmatter
 - Markdown HTML変換
-- YouTube modifier
+- watch/短縮URLのquery parameter変換を含むYouTube modifier
 - shell / Swift syntax highlight markup
 - index、posts section、item、tag list、tag details page
 - custom theme metadata、canonical URL、Open Graph、Analytics

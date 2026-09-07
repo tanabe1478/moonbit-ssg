@@ -83,7 +83,7 @@ pub(all) struct SourceDocument {
 - 画像だけの段落
 - nested listと空行で分離されたlist
 - 旧記事のCRLF入力
-- YouTube blockquote modifier
+- YouTube blockquote modifierとembed query parameter
 - HighlightJSの`hljs-*` markup
 
 AST variantを`match`で分岐します。
@@ -101,6 +101,8 @@ match inline {
 - `content~`はnamed fieldを同名変数へ束縛します。
 - `..`は不要なfieldを無視します。
 - blockとinlineの再帰renderでnested listやlink内画像を処理します。
+
+YouTube modifierはwatch URLと短縮URLを分けて解析します。`v`をvideo IDとして使った後にqueryから除き、`1m55s`のような`t`を`start=115`へ正規化し、残りのembed parameterは順序を保ちます。iframe attributeへ書くときに完成URL全体を一度escapeします。
 
 syntax highlightは移行blog fixtureに必要なshellとSwiftのmarkupを再現します。言語追加時は先にfixtureを追加します。
 

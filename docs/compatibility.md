@@ -12,7 +12,7 @@ Implemented:
 
 - Ink-compatible frontmatter
 - Markdown-to-HTML conversion
-- YouTube modifier
+- YouTube modifier with watch/short URL query parameter conversion
 - shell and Swift syntax highlighting markup
 - index, posts section, item, tag list, and tag details pages
 - custom theme metadata, canonical URLs, Open Graph data, and Analytics

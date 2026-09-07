@@ -83,7 +83,7 @@ A stock CommonMark renderer is not sufficient because Ink differs in areas such 
 - image-only paragraphs
 - nested and blank-line-separated lists
 - historical CRLF input
-- YouTube blockquote modifiers
+- YouTube blockquote modifiers and embed query parameters
 - HighlightJS `hljs-*` markup
 
 Rendering dispatches over AST variants:
@@ -101,6 +101,8 @@ match inline {
 - `content~` binds a named field to a variable with the same name.
 - `..` ignores fields not needed in that branch.
 - Recursive block and inline rendering handles nested lists and images inside links.
+
+The YouTube modifier parses watch and short URLs separately. It removes `v` from the query after using it as the video ID, normalizes `t` values such as `1m55s` to `start=115`, and preserves remaining embed parameters in order. The complete URL is escaped once when written into the iframe attribute.
 
 Syntax highlighting currently reproduces the shell and Swift markup required by the migrated blog fixtures. Add a fixture before expanding language support.
 

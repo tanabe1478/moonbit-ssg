@@ -276,6 +276,159 @@ fn first_word(value : String) -> String {
 }
 
 ///|
+priv struct YouTubeQueryParameter {
+  key : String
+  value : String
+  source : String
+}
+
+///|
+fn youtube_query_parameters(source : String) -> Array[YouTubeQueryParameter] {
+  let parameters : Array[YouTubeQueryParameter] = []
+  if source.is_empty() {
+    return parameters
+  }
+  for part in source.split("&") {
+    if part.is_empty() {
+      continue
+    }
+    let source = part.to_owned()
+    match source.split_once("=") {
+      Some((key, value)) =>
+        parameters.push({
+          key: key.to_owned(),
+          value: value.to_owned(),
+          source,
+        })
+      None => parameters.push({ key: source, value: "", source, })
+    }
+  }
+  parameters
+}
+
+///|
+fn non_negative_integer(value : StringView) -> Int? {
+  let number = @string.parse_int(value) catch { _ => return None }
+  if number < 0 {
+    None
+  } else {
+    Some(number)
+  }
+}
+
+///|
+fn youtube_colon_time(value : String) -> Int? {
+  let parts = value.split(":").to_array()
+  if parts.length() < 2 || parts.length() > 3 {
+    return None
+  }
+  let numbers : Array[Int] = []
+  for part in parts {
+    match non_negative_integer(part) {
+      Some(number) => numbers.push(number)
+      None => return None
+    }
+  }
+  if numbers.length() == 2 {
+    Some(numbers[0] * 60 + numbers[1])
+  } else {
+    Some(numbers[0] * 3600 + numbers[1] * 60 + numbers[2])
+  }
+}
+
+///|
+fn youtube_unit_time(value : String) -> Int? {
+  let mut total = 0
+  let mut number = 0
+  let mut has_number = false
+  let mut has_unit = false
+  for character in value {
+    if character.is_ascii_digit() {
+      number = number * 10 + character.to_int() - '0'.to_int()
+      has_number = true
+      continue
+    }
+    if !has_number {
+      return None
+    }
+    match character {
+      'h' => total = total + number * 3600
+      'm' => total = total + number * 60
+      's' => total = total + number
+      _ => return None
+    }
+    number = 0
+    has_number = false
+    has_unit = true
+  }
+  if has_number || !has_unit {
+    None
+  } else {
+    Some(total)
+  }
+}
+
+///|
+fn youtube_start_seconds(value : String) -> Int? {
+  match non_negative_integer(value) {
+    Some(number) => return Some(number)
+    None => ()
+  }
+  if value.contains(":") {
+    youtube_colon_time(value)
+  } else {
+    youtube_unit_time(value)
+  }
+}
+
+///|
+fn youtube_embed_url(url : String) -> String? {
+  let without_fragment = match url.split_once("#") {
+    Some((before, _fragment)) => before.to_owned()
+    None => url
+  }
+  let (base, query_source) = match without_fragment.split_once("?") {
+    Some((base, query)) => (base.to_owned(), query.to_owned())
+    None => (without_fragment, "")
+  }
+  let parameters = youtube_query_parameters(query_source)
+  let id = if base.has_prefix("https://youtu.be/") {
+    base["https://youtu.be/".length():].to_owned()
+  } else if base.has_prefix("http://youtu.be/") {
+    base["http://youtu.be/".length():].to_owned()
+  } else {
+    match parameters.iter().find_first(fn(parameter) { parameter.key == "v" }) {
+      Some(parameter) => parameter.value
+      None => return None
+    }
+  }
+  if id.is_empty() {
+    return None
+  }
+  let has_start = parameters.any(fn(parameter) { parameter.key == "start" })
+  let embed_parameters : Array[String] = []
+  for parameter in parameters {
+    if parameter.key == "v" {
+      continue
+    }
+    if parameter.key == "t" && !has_start {
+      match youtube_start_seconds(parameter.value) {
+        Some(seconds) => embed_parameters.push("start=\{seconds}")
+        None => embed_parameters.push(parameter.source)
+      }
+    } else if parameter.key != "t" || !has_start {
+      embed_parameters.push(parameter.source)
+    }
+  }
+  let query = if embed_parameters.is_empty() {
+    ""
+  } else {
+    "?\{embed_parameters.join("&")}"
+  }
+  Some("https://www.youtube.com/embed/\{id}\{query}")
+}
+
+///|
 fn youtube_embed(blocks : Array[@markdown.Block]) -> String? {
   if blocks.length() != 1 {
     return None
@@ -293,16 +446,12 @@ fn youtube_embed(blocks : Array[@markdown.Block]) -> String? {
     return None
   }
   let url = text[prefix.length():].trim().to_owned()
-  let id = if url.has_prefix("https://youtu.be") {
-    url["https://youtu.be".length():].split("?").to_array()[0].to_owned()
-  } else {
-    match url.find("v=") {
-      Some(start) => url[start + 2:].split("&").to_array()[0].to_owned()
-      None => return None
-    }
+  let embed_url = match youtube_embed_url(url) {
+    Some(embed_url) => embed_url
+    None => return None
   }
   Some(
-    "<div class=\"youtube\"><iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/\{escape_attribute(id)}\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen></iframe></div>",
+    "<div class=\"youtube\"><iframe width=\"560\" height=\"315\" src=\"\{escape_attribute(embed_url)}\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen></iframe></div>",
   )
 }
 
