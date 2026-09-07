@@ -112,6 +112,7 @@ A directory containing `moon.pkg` is a MoonBit package boundary. Closely related
 - Architecture: [English](docs/architecture.md) / [日本語](docs/architecture.ja.md)
 - Implementation guide: [English](docs/implementation.md) / [日本語](docs/implementation.ja.md)
 - Publish 0.9 compatibility: [English](docs/compatibility.md) / [日本語](docs/compatibility.ja.md)
+- General-purpose roadmap: [English](docs/roadmap.md) / [日本語](docs/roadmap.ja.md)
 
 ## License
 

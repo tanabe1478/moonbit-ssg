@@ -112,6 +112,7 @@ MoonBitでは`moon.pkg`を置いたdirectoryがpackage境界です。相互依�
 - Architecture: [English](docs/architecture.md) / [日本語](docs/architecture.ja.md)
 - 実装guide: [English](docs/implementation.md) / [日本語](docs/implementation.ja.md)
 - Publish 0.9互換範囲: [English](docs/compatibility.md) / [日本語](docs/compatibility.ja.md)
+- 汎用SSG roadmap: [English](docs/roadmap.md) / [日本語](docs/roadmap.ja.md)
 
 ## License
 
