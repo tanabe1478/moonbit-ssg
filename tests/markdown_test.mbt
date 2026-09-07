@@ -76,7 +76,23 @@ test "apply the blog YouTube modifier" {
   inspect(
     @ssg.render_markdown("> youtube https://youtu.be/video-id?t=10"),
     content=(
-      #|<div class="youtube"><iframe width="560" height="315" src="https://www.youtube.com/embed//video-id" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+      #|<div class="youtube"><iframe width="560" height="315" src="https://www.youtube.com/embed/video-id?start=10" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+    ),
+  )
+  inspect(
+    @ssg.render_markdown(
+      "> youtube https://www.youtube.com/watch?v=video-id&t=1m55s&list=PL123",
+    ),
+    content=(
+      #|<div class="youtube"><iframe width="560" height="315" src="https://www.youtube.com/embed/video-id?start=115&amp;list=PL123" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+    ),
+  )
+  inspect(
+    @ssg.render_markdown(
+      "> youtube https://www.youtube.com/watch?v=video-id&start=30&autoplay=1",
+    ),
+    content=(
+      #|<div class="youtube"><iframe width="560" height="315" src="https://www.youtube.com/embed/video-id?start=30&amp;autoplay=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
     ),
   )
 }
