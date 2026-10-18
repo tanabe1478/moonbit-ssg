@@ -74,68 +74,10 @@ fn write_output_file(
 }
 
 ///|
-fn filesystem_tag_name(tag : String) -> String {
-  // Foundation writes decomposed filenames on macOS. The current site's only
-  // precomposed kana tag needs the same on-disk representation for parity.
-  tag.replace_all(old="ゲ", new="ゲ")
-}
-
-///|
-/// Generates HTML pages and copies Publish resources into a clean output tree.
-pub fn write_site_output(
-  config : SiteConfig,
-  content_directory : String,
-  resources_directory : String,
-  output_directory : String,
-  theme_stylesheet? : String = "MyHtmlTheme/styles.css",
-  build_date? : BuildDate,
-) -> Unit raise @fs.IOError {
-  let site = load_site_content(content_directory)
-  let build_date = build_date.unwrap_or_else(current_build_date)
-  remove_tree(output_directory)
-  ensure_directory(output_directory)
-  write_output_file(
-    output_directory,
-    "index.html",
-    render_index_page(config, site),
-  )
-  write_output_file(
-    output_directory,
-    "posts/index.html",
-    render_section_page(config, site),
-  )
-  for post in site.posts {
-    write_output_file(
-      output_directory,
-      "posts/\{post.slug}/index.html",
-      render_post_page(config, post),
-    )
+fn join_path(parent : String, child : String) -> String {
+  if parent.has_suffix("/") {
+    "\{parent}\{child}"
+  } else {
+    "\{parent}/\{child}"
   }
-  write_output_file(
-    output_directory,
-    "tags/index.html",
-    render_tag_list_page(config, site),
-  )
-  for tag in site.all_tags() {
-    write_output_file(
-      output_directory,
-      "tags/\{filesystem_tag_name(tag)}/index.html",
-      render_tag_details_page(config, site, tag),
-    )
-  }
-  write_output_file(
-    output_directory,
-    "feed.rss",
-    render_rss_feed(config, site, build_date),
-  )
-  write_output_file(
-    output_directory,
-    "sitemap.xml",
-    render_sitemap(config, site, build_date),
-  )
-  copy_tree(resources_directory, output_directory)
-  copy_tree(
-    join_path(resources_directory, theme_stylesheet),
-    join_path(output_directory, "styles.css"),
-  )
 }

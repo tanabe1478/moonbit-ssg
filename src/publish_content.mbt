@@ -1,4 +1,29 @@
 ///|
+/// Raw Markdown and its URL slug before it is converted into a post.
+pub(all) struct PostSource {
+  slug : String
+  source : String
+} derive(Eq, Debug)
+
+///|
+fn compare_unicode_scalars(left : String, right : String) -> Int {
+  let left_characters = left.to_array()
+  let right_characters = right.to_array()
+  let count = if left_characters.length() < right_characters.length() {
+    left_characters.length()
+  } else {
+    right_characters.length()
+  }
+  for index = 0; index < count; index = index + 1 {
+    let order = left_characters[index].compare(right_characters[index])
+    if order != 0 {
+      return order
+    }
+  }
+  left_characters.length().compare(right_characters.length())
+}
+
+///|
 /// A duration accepted by Publish's audio metadata.
 pub(all) struct AudioDuration {
   hours : Int

@@ -21,8 +21,6 @@ pub fn build_publish_project(String, build_date? : BuildDate) -> Result[String, 
 
 pub fn build_published_content(String, Array[PublishSectionSource], Array[PublishPageSource]) -> PublishedContent
 
-pub fn build_site_content(String, String, Array[PostSource]) -> SiteContent
-
 pub fn cached_publish_result(String, String, String, String, () -> Result[String, String]) -> Result[PublishCacheValue, String]
 
 pub fn cached_publish_value(String, String, String, String, () -> String) -> PublishCacheValue raise @fs.IOError
@@ -77,8 +75,6 @@ pub fn install_publish_plugin(PublishPlugin) -> PublishingStep
 
 pub fn load_published_content(String, Array[String]) -> PublishedContent raise @fs.IOError
 
-pub fn load_site_content(String) -> SiteContent raise @fs.IOError
-
 pub fn mutate_publish_item(PublishedContent, String, String, (PublishItem) -> Result[PublishItem, String]) -> Result[PublishedContent, String]
 
 pub fn mutate_publish_items(PublishedContent, PublishPredicate[PublishItem], (PublishItem) -> Result[PublishItem, String], section_id? : String) -> Result[PublishedContent, String]
@@ -105,11 +101,7 @@ pub fn render_cached_publish_podcast_feed(String, PublishSiteConfig, PublishedCo
 
 pub fn render_cached_publish_rss_feed(String, PublishSiteConfig, PublishedContent, Array[String], BuildDate, configuration? : PublishRSSConfiguration, item_predicate? : (PublishItem) -> Bool, step_name? : String) -> Result[PublishCacheValue, String]
 
-pub fn render_index_page(SiteConfig, SiteContent) -> String
-
 pub fn render_markdown(String) -> String
-
-pub fn render_post_page(SiteConfig, Post) -> String
 
 pub fn render_publish_audio_player(Audio, show_controls? : Bool) -> String
 
@@ -123,16 +115,6 @@ pub fn render_publish_sitemap(PublishSiteConfig, PublishedContent, BuildDate, ex
 
 pub fn render_publish_video_player(Video, show_controls? : Bool) -> String
 
-pub fn render_rss_feed(SiteConfig, SiteContent, BuildDate) -> String
-
-pub fn render_section_page(SiteConfig, SiteContent) -> String
-
-pub fn render_sitemap(SiteConfig, SiteContent, BuildDate) -> String
-
-pub fn render_tag_details_page(SiteConfig, SiteContent, String) -> String
-
-pub fn render_tag_list_page(SiteConfig, SiteContent) -> String
-
 pub fn sort_publish_items(PublishedContent, (PublishItem, PublishItem) -> Int, order? : SortOrder, section_id? : String) -> PublishedContent
 
 pub fn sync_git_deployment_output(String, GitDeploymentConfiguration) -> Result[Unit, String]
@@ -140,8 +122,6 @@ pub fn sync_git_deployment_output(String, GitDeploymentConfiguration) -> Result[
 pub fn version() -> String
 
 pub fn write_foundation_stylesheet(String) -> Unit raise @fs.IOError
-
-pub fn write_site_output(SiteConfig, String, String, String, theme_stylesheet? : String, build_date? : BuildDate) -> Unit raise @fs.IOError
 
 // Errors
 
@@ -249,18 +229,6 @@ pub(all) enum PodcastType {
   Episodic
   Serial
 } derive(Eq, @debug.Debug)
-
-pub(all) struct Post {
-  slug : String
-  title : String
-  description : String
-  date : String
-  tags : Array[String]
-  image_path : String?
-  body_html : String
-} derive(Eq, @debug.Debug)
-pub fn Post::date_day(Self) -> String
-pub fn Post::path(Self) -> String
 
 pub(all) struct PostSource {
   slug : String
@@ -395,29 +363,6 @@ pub(all) struct RSSItemProperties {
   body_suffix : String?
   link : String?
 } derive(Eq, @debug.Debug)
-
-pub(all) struct SiteConfig {
-  url : String
-  name : String
-  description : String
-  language : String
-  image_path : String
-  favicon_path : String
-  stylesheet_path : String
-  feed_path : String
-  analytics_id : String
-  x_url : String
-  github_url : String
-} derive(Eq, @debug.Debug)
-
-pub(all) struct SiteContent {
-  index_title : String
-  section_title : String
-  posts : Array[Post]
-} derive(Eq, @debug.Debug)
-pub fn SiteContent::all_tags(Self) -> Array[String]
-pub fn SiteContent::posts_by_descending_date(Self) -> Array[Post]
-pub fn SiteContent::posts_tagged_with(Self, String) -> Array[Post]
 
 pub(all) enum SortOrder {
   Ascending

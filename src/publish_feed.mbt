@@ -257,3 +257,18 @@ pub fn render_publish_sitemap(
   }
   "<?xml version=\"1.0\" encoding=\"UTF-8\"?><urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" xmlns:image=\"http://www.google.com/schemas/sitemap-image/1.1\">\{entries.join("")}</urlset>"
 }
+
+///|
+fn xml_text(value : String) -> String {
+  escape_html(value)
+}
+
+///|
+fn sitemap_entry(
+  url : String,
+  frequency : String,
+  priority : String,
+  last_modified : String,
+) -> String {
+  "<url><loc>\{url}</loc><changefreq>\{frequency}</changefreq><priority>\{priority}</priority><lastmod>\{last_modified}</lastmod></url>"
+}

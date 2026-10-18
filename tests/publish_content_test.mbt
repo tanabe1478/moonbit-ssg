@@ -111,3 +111,44 @@ test "query tags across multiple Publish sections" {
     content="[\"Newer\", \"Older\"]",
   )
 }
+
+///|
+test "prefer metadata title, then the first heading, then the filename" {
+  let titles = [
+    @ssg.build_publish_item(
+      "posts",
+      "metadata-title",
+      (
+        #|---
+        #|title: Explicit title
+        #|date: 2024-01-01 00:00
+        #|---
+        #|# Heading title
+      ),
+    ),
+    @ssg.build_publish_item(
+      "posts",
+      "heading-title",
+      (
+        #|---
+        #|date: 2024-01-01 00:00
+        #|---
+        #|# Heading title
+      ),
+    ),
+    @ssg.build_publish_item(
+      "posts",
+      "filename-title",
+      (
+        #|---
+        #|date: 2024-01-01 00:00
+        #|---
+        #|## No level-one heading
+      ),
+    ),
+  ].map(fn(item) { item.content.title })
+  debug_inspect(
+    titles,
+    content="[\"Explicit title\", \"Heading title\", \"filename-title\"]",
+  )
+}
