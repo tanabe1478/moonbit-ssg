@@ -4,11 +4,11 @@
 
 比較対象はSwift Publish `0.9.0`（revision `1c8ad00d39c985cb5d497153241a2f1b654e0d40`）です。
 
-互換性は、`tanabe1478/blog`の正確な移行contractと、Publish framework全体の再利用可能な機能に分けて管理します。Swift source levelのAPI互換は目標にしません。
+互換性の境界は生成結果です。Publish frameworkの再利用可能な機能を以下で管理します。Swift source levelのAPI互換は目標にしません。
 
-## tanabe1478/blogの移行contract
+## 経緯: tanabe1478/blogの移行
 
-実装済み:
+`tanabe1478/blog`をSwift Publishから移行する際に必要だった機能:
 
 - Ink互換frontmatter
 - Markdown HTML変換
@@ -23,6 +23,8 @@
 - build timezone offsetの維持
 
 blog repositoryからSwift Publishを削除する前に、88個の生成fileがbyte単位で一致することを確認しました。index、最新記事、tag list、移行記事のdesktop/mobile表示でもpixel差分0を確認済みです。現在のblog本番出力はmoonbit-ssgだけで生成します。
+
+この出力を再現していたblog固有adapterは、その後libraryから削除しました。現在のblogは自身のrepositoryから汎用API（`load_published_content`、custom `PublishHTMLFactory`を渡す`generate_publish_html`、`render_publish_rss_feed`、`render_publish_sitemap`、file copy helper）で生成し、生成結果の検証もblog側で行います。HTMLと`feed.rss`はbyte単位で一致し、意図した差分はtag directory名のNFC化（NFCのlinkに一致）と、sitemap `lastmod`がbuild日時ではなく各記事の日付になった点です。
 
 ## Publishの汎用機能
 

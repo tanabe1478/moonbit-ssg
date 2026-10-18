@@ -10,7 +10,7 @@
 
 互換性の境界はrepository構成やAPIの維持ではなく、生成結果です。HTML、公開URL、feed、sitemap entry、resource、browserから見える挙動は、意図した変更でない限り同等に保ちます。1.0以前は、重複を除いて汎用設計を改善できるなら、library API、`site.md`、CLI引数、内部model、blog repositoryを変更できます。
 
-本番blogへ影響する変更は、同じ作業の流れで`tanabe1478/blog`側も更新し、生成結果とpublic smoke checkを確認します。site固有adapterは移行用であり、永続的なarchitecture制約にはしません。
+本番blogへ影響する変更は、同じ作業の流れで`tanabe1478/blog`側も更新し、生成結果とpublic smoke checkを確認します。site固有の設定とthemeはlibraryではなく各siteのrepositoryに置きます。
 
 ## 比較対象
 
@@ -43,7 +43,7 @@ moonbit-ssgは単純なMarkdown-to-HTML tool以上の土台を持っています
 - resource copy
 - argument配列境界を持つGit/GitHub deployment helper
 - project scaffold、generate、preview server、deploy CLI
-- 本番blogで検証済みの分離された互換adapter
+- library外に独自themeを持つ本番blogで検証済みの汎用API
 
 ## Gap matrix
 
@@ -94,7 +94,7 @@ Status:
 
 最優先の理由: 下書きの誤公開と、原因が分からないbuild失敗は便利機能ではなく正しさの問題です。
 
-出力条件: 公開制御によって現在公開中のblog contentを意図せず消してはいけません。意図的な未来日付記事はblog側の設定やmetadataを更新して許可できます。adapter API自体を維持する必要はありません。
+出力条件: 公開制御によって現在公開中のblog contentを意図せず消してはいけません。意図的な未来日付記事はblog側の設定やmetadataを更新して許可できます。
 
 #### 2. Project local layoutとpartial
 
@@ -167,7 +167,7 @@ live reloadより、まず信頼できるrebuildを優先します。
 
 「過剰」は今すぐ削除する意味ではありません。便利でtest済みですが、最小の汎用SSG coreには必須でない機能です。
 
-1. **`tanabe1478/blog` byte互換adapter** — 移行実績として有用ですが、site固有の一時的な層です。汎用設定/themeで公開結果を再現できたら削除します。
+1. ~~**`tanabe1478/blog` byte互換adapter**~~ — 削除済み。blogは独自HTML factoryと汎用APIで公開結果を再現しています。
 2. **Podcast・rich media** — 最小coreでは一般的でない。
 3. **Git/GitHub deployment実装** — CI/pluginへ任せるSSGも多い。
 4. **手書きshell/Swift highlight互換** — 対象が狭く移行由来。
@@ -176,7 +176,7 @@ live reloadより、まず信頼できるrebuildを優先します。
 当面の方針:
 
 - 置き換え経路を用意する間は生成結果を安定させる。
-- blogを汎用APIへ移行した後、site固有APIを削除する。
+- libraryへsite固有APIを追加しない（blog adapterは削除済み）。
 - 互換挙動を汎用defaultへ漏らさない。
 - 境界をdocument化する。
 - MoonBit package依存をacyclicに保ち、公開APIが成熟した段階だけsubpackage化を検討する。
@@ -188,7 +188,7 @@ live reloadより、まず信頼できるrebuildを優先します。
 3. **純粋なpagination model**
 4. **template engine調査とdesign note**
 5. **project local layout/partial prototype**
-6. **`tanabe1478/blog`を汎用設定へ移行し、専用adapterを削除**
+6. ~~**`tanabe1478/blog`を汎用設定へ移行し、専用adapterを削除**~~ — 完了。4-5より先に既存のcallback HTML factoryで実施
 7. **watch/rebuild loop**
 8. **alias、404、robots、collision check**
 9. **taxonomyとdata file**
@@ -204,7 +204,7 @@ live reloadより、まず信頼できるrebuildを優先します。
 API/model案:
 
 - raw metadataは維持する。
-- blog固有modelを変えず、解析済みpublication stateを追加する。
+- raw metadataと並べて、解析済みpublication stateを追加する。
 - build日時と`include_drafts`、`include_future`、`include_expired`を持つ`PublishBuildPolicy`を定義する。
 - HTML、tag、RSS、podcast、sitemap生成前に1回だけcontentをfilterする。
 - `site.md` defaultとCLI overrideの両方から同じpolicyを使う。

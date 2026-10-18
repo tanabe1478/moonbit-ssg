@@ -4,7 +4,7 @@
 
 Swift Publish 0.9と互換性のある出力・機能を目標にした、MoonBit製の静的site generatorです。
 
-`tanabe1478/blog`は現在、moonbit-ssgだけで本番siteを生成しています。Swift Publishを削除する前に、88個の生成fileについてbyte単位の一致を確認し、desktop/mobileのbrowser表示でもpixel差分がないことを確認しました。
+`tanabe1478/blog`は現在、moonbit-ssgだけで本番siteを生成しています。Swift Publishを削除する前に、88個の生成fileについてbyte単位の一致を確認し、desktop/mobileのbrowser表示でもpixel差分がないことを確認しました。現在のblogは設定とthemeを自身のrepositoryに持ち、汎用library API経由で生成しています。このrepositoryにsite固有codeはありません。
 
 ## 必要な環境
 
@@ -43,8 +43,6 @@ generate [ROOT] [BUILD_DATE]      汎用projectを生成
 run [ROOT] [-p PORT]              汎用projectを生成して配信
 deploy [ROOT]                     汎用projectを生成してdeploy
 render-markdown INPUT             Markdown fileを1つ描画
-build CONTENT RESOURCES OUTPUT [BUILD_DATE]
-                                  tanabe1478/blog互換siteを生成
 ```
 
 引数なしでhelpを表示します。

@@ -130,8 +130,6 @@ let content = @ssg.load_published_content("Content", ["posts", "episodes"])
 
 I/Oと純粋なmodel構築を分けています。`build_published_content`は文字列から同じmodelを作るため、sorting、metadata、mutationをfilesystemなしでtestできます。
 
-`src/content.mbt`の`SiteContent`は歴史的blog adapterです。新しい再利用codeでは`PublishedContent`を使います。
-
 ## HTML factoryとtheme
 
 `PublishHTMLFactory`はindex、section、item、page、tag list、tag detailのcallbackを保持します。`generate_publish_html`は`PublishedContent`のlocationを出力pathへ対応させ、callbackを呼びます。
@@ -148,7 +146,7 @@ I/Oと純粋なmodel構築を分けています。`build_published_content`は�
 - `foundation_stylesheet`
 - `write_foundation_stylesheet`
 
-blog固有rendererは`src/theme.mbt`へ分離し、歴史的なbyte出力を維持しつつ、新規projectのdefaultへ不自然な挙動を持ち込みません。
+異なる出力contractが必要なsiteは独自の`PublishHTMLFactory`を渡します。例えば`tanabe1478/blog`は歴史的なthemeを自身のrepository内のfactoryとして実装し、`generate_publish_html`へ`tag_base_path="tags"`を渡しています。
 
 ## Feedとsitemap
 
@@ -162,7 +160,7 @@ blog固有rendererは`src/theme.mbt`へ分離し、歴史的なbyte出力を維�
 
 `render_publish_sitemap`はsection、item、page、excluded path、`lastModified`集約に対応します。
 
-`BuildDate`は注入できます。
+`BuildDate`（`src/build_date.mbt`）は注入できます。
 
 ```moonbit
 let date = @ssg.BuildDate::parse("2026-09-05T13:44:37+0900").unwrap()
@@ -179,7 +177,7 @@ let date = @ssg.BuildDate::parse("2026-09-05T13:44:37+0900").unwrap()
 - recursive copy helper: binary resourceとpathを維持
 - `write_output_file`: 親directoryを作ってfile書込
 
-`write_site_output`はblog互換writerです。汎用projectの`build_publish_project`は`load_published_content`、HTML生成、Foundation resource、cached RSS、sitemap生成を合成します。
+汎用projectの`build_publish_project`は`load_published_content`、HTML生成、Foundation resource、cached RSS、sitemap生成を合成します。
 
 ## 永続cache形式
 
@@ -233,13 +231,3 @@ CLIはMoonBit async process APIを具体的なhost runnerとして使います�
 `src/project.mbt`は`site.md`解析、website/plugin package scaffold、汎用build合成を担当します。`cmd/main`は引数を解析し、errorを表示してlibrary APIを呼ぶ薄い層です。
 
 `new plugin`は既存MoonBit module内へpackageを生成します。MoonBit module manifestはregistry外Git dependencyを直接参照できないため、standalone dependencyは生成しません。
-
-## Blog互換adapter
-
-低level command:
-
-```sh
-mise exec -- moon run cmd/main -- build Content Resources Output
-```
-
-は歴史的な`tanabe1478/blog`設定とtheme contractを使います。移行済み本番siteを安定させるためのadapterです。新規siteでは`site.md`、`new`、`generate`を使ってください。

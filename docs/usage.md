@@ -264,20 +264,17 @@ let site : @ssg.PublishSiteConfig = {
 
 The library also exposes custom HTML factories, predicates, immutable content operations, publishing pipelines, feed and sitemap renderers, media components, file-copy steps, and injectable Git/GitHub deployment helpers. Refer to [`src/pkg.generated.mbti`](../src/pkg.generated.mbti) for exact signatures.
 
-## 11. Build the tanabe1478/blog compatibility site
+## 11. Build a site with its own theme
 
-The low-level `build` command preserves the historical blog-specific output contract:
+A site whose output cannot be expressed with `site.md` and the Foundation theme can live in its own MoonBit module that depends on `tanabe1478/moonbit-ssg`. Its `main` loads content with `load_published_content`, passes its own `PublishHTMLFactory` to `generate_publish_html`, and writes feeds and resources with `render_publish_rss_feed`, `render_publish_sitemap`, `copy_publish_files`, and `copy_publish_file`.
 
-```sh
-mise exec -- moon run cmd/main -- \
-  build Content Resources Output
+`moon.mod` cannot declare a local path dependency, so a site that vendors moonbit-ssg (for example as a Git submodule) resolves it through a `moon.work` workspace:
+
+```text
+members = [
+  "./site",
+  "./vendor/moonbit-ssg",
+]
 ```
 
-An optional timestamp enables deterministic migration checks:
-
-```sh
-mise exec -- moon run cmd/main -- \
-  build Content Resources Output 2026-09-05T13:44:37+0900
-```
-
-New sites should use `new`, `site.md`, and `generate` instead.
+[`tanabe1478/blog`](https://github.com/tanabe1478/blog) uses this layout.

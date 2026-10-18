@@ -10,7 +10,7 @@ The target is a practical blog and documentation SSG. It is not intended to beco
 
 The compatibility boundary is generated behavior, not repository layout or API stability. HTML, public URLs, feeds, sitemap entries, resources, and browser-visible behavior should remain equivalent unless a change is intentional. Before 1.0, library APIs, `site.md`, CLI arguments, internal models, and the blog repository may change when doing so removes duplication or improves the general design.
 
-Changes that affect the production blog should update `tanabe1478/blog` in the same work sequence and verify its generated output and public smoke checks. A site-specific adapter is transitional, not a permanent architecture constraint.
+Changes that affect the production blog should update `tanabe1478/blog` in the same work sequence and verify its generated output and public smoke checks. Site-specific configuration and themes live in the site's repository, not in this library.
 
 ## Reference projects
 
@@ -43,7 +43,7 @@ moonbit-ssg already has a stronger base than a minimal Markdown-to-HTML tool:
 - resource copying
 - Git/GitHub deployment helpers with argument-array process boundaries
 - project scaffolding, generation, preview server, and deployment CLI
-- an isolated compatibility adapter proven against a production blog
+- a generic API proven by a production blog that keeps its own theme outside the library
 
 ## Gap matrix
 
@@ -94,7 +94,7 @@ Add generic content metadata and build policy for:
 
 Why first: accidentally publishing drafts or failing to publish without an understandable error is a correctness problem, not an optional convenience.
 
-Output constraint: publication controls must not accidentally remove currently public blog content. The blog's configuration or source may be updated to opt into intentional future-dated content; the adapter API itself does not need to remain unchanged.
+Output constraint: publication controls must not accidentally remove currently public blog content. The blog's configuration or source may be updated to opt into intentional future-dated content.
 
 #### 2. Project-local layouts and partials
 
@@ -167,7 +167,7 @@ These are better handled by plugins or external build tools unless a concrete Mo
 
 “Excessive” does not mean “remove now.” These features are useful and tested, but they are not prerequisites for a minimal general-purpose SSG:
 
-1. **`tanabe1478/blog` byte-compatibility adapter** — valuable migration evidence, but transitional and site-specific. Remove it after the generic configuration/theme path can reproduce the public output.
+1. ~~**`tanabe1478/blog` byte-compatibility adapter**~~ — removed. The blog now reproduces its public output through the generic API with its own HTML factory.
 2. **Podcast and rich media support** — uncommon in a minimal core.
 3. **Git/GitHub deployment implementation** — many SSGs leave deployment to CI or plugins.
 4. **Handwritten shell and Swift highlighting compatibility** — narrow and migration-driven.
@@ -176,7 +176,7 @@ These are better handled by plugins or external build tools unless a concrete Mo
 Near-term policy:
 
 - keep generated behavior stable while replacement paths are introduced;
-- remove site-specific APIs once the blog has migrated to generic APIs;
+- do not add site-specific APIs to the library (the blog adapter has been removed);
 - do not let compatibility behavior become the default generic behavior;
 - document boundaries;
 - consider subpackages only when MoonBit package dependencies can remain acyclic and the public API is mature.
@@ -188,7 +188,7 @@ Near-term policy:
 3. **Pure pagination model**
 4. **Template engine evaluation and design note**
 5. **Project-local layouts/partials prototype**
-6. **Migrate `tanabe1478/blog` to generic configuration and remove its adapter**
+6. ~~**Migrate `tanabe1478/blog` to generic configuration and remove its adapter**~~ — done, using the existing callback HTML factory ahead of steps 4-5
 7. **Watch/rebuild loop**
 8. **Aliases, 404, robots, and collision checks**
 9. **Taxonomies and data files**
@@ -204,7 +204,7 @@ The first slice should be publication controls because it is small enough to rev
 Proposed API/model:
 
 - preserve raw metadata;
-- add parsed publication state without changing blog-specific models;
+- add parsed publication state alongside raw metadata;
 - define a `PublishBuildPolicy` with `include_drafts`, `include_future`, `include_expired`, and build time;
 - filter content once before HTML, tags, RSS, podcast, and sitemap generation;
 - expose the same policy through `site.md` defaults and CLI overrides.

@@ -25,14 +25,14 @@ source.mbt
       ├── markdown.mbt
       │     Ink互換HTML変換
       │
-      ├── content.mbt / publish_content.mbt
-      │     blog固有 / Publish汎用content model
+      ├── publish_content.mbt
+      │     Publish汎用content model
       │
-      ├── theme.mbt / publish_html.mbt / foundation.mbt
-      │     blog固有theme / callback HTML factory / Foundation theme
+      ├── publish_html.mbt / foundation.mbt
+      │     callback HTML factory / Foundation theme
       │
-      ├── feed.mbt / publish_feed.mbt / podcast.mbt
-      │     blog固有・汎用RSS、sitemap、podcast feed
+      ├── build_date.mbt / publish_feed.mbt / podcast.mbt
+      │     build日時、RSS、sitemap、podcast feed
       │
       ├── output.mbt / publish_files.mbt / project.mbt
       │     filesystem出力、resource copy、汎用project
@@ -48,12 +48,9 @@ source.mbt
 
 ## Content model
 
-2つの層を意図的に共存させています。
+`PublishedContent`と`PublishSiteConfig`は、複数section、page、nested item path、custom metadata、media、feed、factory、pipelineといった再利用可能なPublish相当機能を提供します。新しい機能はこの層へ追加します。
 
-- `SiteContent`と`SiteConfig`は`tanabe1478/blog`の歴史的な出力contractを正確に維持します。
-- `PublishedContent`と`PublishSiteConfig`は、複数section、page、nested item path、custom metadata、media、feed、factory、pipelineといった再利用可能なPublish相当機能を提供します。
-
-新しい汎用機能は`PublishedContent`層へ追加します。blog固有挙動は分離し、互換修正が新規siteのdefaultへ漏れないようにします。
+library内にsite固有modelはありません。`tanabe1478/blog`のように独自の出力contractを持つsiteは、設定とthemeを自身のrepositoryに置き、`PublishSiteConfig`とcustom `PublishHTMLFactory`として渡します。これによりsite固有の挙動が新規siteのdefaultへ漏れません。
 
 ## Immutable pipeline
 
@@ -98,4 +95,4 @@ private実装ではなく利用者から見える振る舞いを固定し、内�
 
 `cmd/main`は引数解釈、利用者向けerror、host process実行を担当します。scaffold、project読込、生成、output同期、renderingはCLI分岐へ埋め込まず、libraryの公開APIへ置きます。
 
-低levelの`build` commandだけは`tanabe1478/blog`用の明示的な互換adapterとして残します。新規projectは`site.md`と汎用`generate` commandを利用します。
+CLIにsite固有commandはありません。projectは`site.md`と汎用`generate` commandを使うか、自身のMoonBit moduleからlibraryを呼び出します。

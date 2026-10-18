@@ -132,8 +132,6 @@ let content = @ssg.load_published_content("Content", ["posts", "episodes"])
 
 `build_published_content` constructs the same model from strings, which keeps sorting, metadata, and mutation tests independent from the filesystem.
 
-The historical blog adapter in `src/content.mbt` uses `SiteContent`. New reusable code should use `PublishedContent`.
-
 ## HTML factories and themes
 
 `PublishHTMLFactory` stores callbacks for index, section, item, page, tag list, and tag details rendering. `generate_publish_html` maps `PublishedContent` locations to output paths and invokes those callbacks.
@@ -150,7 +148,7 @@ The built-in Foundation implementation consists of:
 - `foundation_stylesheet`
 - `write_foundation_stylesheet`
 
-The blog-specific renderer remains separate in `src/theme.mbt` to preserve historical byte-level output without imposing its quirks on new projects.
+Sites that need a different output contract supply their own `PublishHTMLFactory`. For example, `tanabe1478/blog` implements its historical theme as a factory in its own repository and passes `tag_base_path="tags"` to `generate_publish_html`.
 
 ## Feeds and sitemap
 
@@ -164,7 +162,7 @@ Both feeds have cached variants. They build a cache key using a fixed timestamp 
 
 `render_publish_sitemap` includes sections, items, and pages, supports excluded paths, and aggregates `lastModified` values.
 
-`BuildDate` is injectable:
+`BuildDate` (in `src/build_date.mbt`) is injectable:
 
 ```moonbit
 let date = @ssg.BuildDate::parse("2026-09-05T13:44:37+0900").unwrap()
@@ -181,7 +179,7 @@ Output code performs four distinct operations:
 - recursive copy helpers: preserve binary resources and paths
 - `write_output_file`: create a file's parent directory and write content
 
-`write_site_output` is the blog compatibility writer. Generic projects compose `load_published_content`, HTML generation, Foundation resources, cached RSS, and sitemap generation in `build_publish_project`.
+Generic projects compose `load_published_content`, HTML generation, Foundation resources, cached RSS, and sitemap generation in `build_publish_project`.
 
 ## Persistent cache format
 
@@ -235,13 +233,3 @@ The CLI uses MoonBit's async process API as a concrete host runner. Authenticati
 `src/project.mbt` parses `site.md`, scaffolds websites and plugin packages, and composes the generic build. `cmd/main` is intentionally thin: it parses arguments, displays errors, and invokes library APIs.
 
 `new plugin` generates a package inside an existing MoonBit module. It does not create a standalone dependency because MoonBit module manifests cannot point directly to a registry-external Git dependency.
-
-## Blog compatibility adapter
-
-The low-level command:
-
-```sh
-mise exec -- moon run cmd/main -- build Content Resources Output
-```
-
-uses the historical `tanabe1478/blog` configuration and theme contract. It exists to keep the migrated production site stable. New sites should use `site.md`, `new`, and `generate`.

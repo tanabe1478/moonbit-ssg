@@ -264,20 +264,17 @@ let site : @ssg.PublishSiteConfig = {
 
 custom HTML factory、predicate、immutable content操作、publishing pipeline、feed/sitemap renderer、media component、file copy step、runner注入式Git/GitHub deploy helperも公開しています。正確なsignatureは[`src/pkg.generated.mbti`](../src/pkg.generated.mbti)を参照してください。
 
-## 11. tanabe1478/blog互換siteを生成する
+## 11. 独自themeでsiteを生成する
 
-低levelの`build` commandは、移行元blog固有の出力contractを維持します。
+`site.md`とFoundation themeで表現できない出力が必要なsiteは、`tanabe1478/moonbit-ssg`に依存する独自のMoonBit moduleとして作れます。`main`で`load_published_content`によりcontentを読み、独自の`PublishHTMLFactory`を`generate_publish_html`へ渡し、`render_publish_rss_feed`、`render_publish_sitemap`、`copy_publish_files`、`copy_publish_file`でfeedとresourceを書き出します。
 
-```sh
-mise exec -- moon run cmd/main -- \
-  build Content Resources Output
+`moon.mod`はlocal path dependencyを宣言できないため、moonbit-ssgをvendorする場合（例: Git submodule）は`moon.work` workspaceで解決します。
+
+```text
+members = [
+  "./site",
+  "./vendor/moonbit-ssg",
+]
 ```
 
-再現可能な移行検証には日時を指定できます。
-
-```sh
-mise exec -- moon run cmd/main -- \
-  build Content Resources Output 2026-09-05T13:44:37+0900
-```
-
-新規siteでは`new`、`site.md`、`generate`を利用してください。
+[`tanabe1478/blog`](https://github.com/tanabe1478/blog)はこの構成を使っています。

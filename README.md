@@ -4,7 +4,7 @@
 
 A static site generator written in MoonBit, with output and capabilities compatible with Swift Publish 0.9.
 
-`tanabe1478/blog` now uses moonbit-ssg as its sole production generator. Before removing Swift Publish, the migration was validated against 88 generated files byte-for-byte and with pixel-identical desktop and mobile browser checks.
+`tanabe1478/blog` uses moonbit-ssg as its sole production generator. Before removing Swift Publish, the migration was validated against 88 generated files byte-for-byte and with pixel-identical desktop and mobile browser checks. The blog now keeps its own configuration and theme in its repository and builds through the generic library API; this repository contains no site-specific code.
 
 ## Requirements
 
@@ -43,8 +43,6 @@ generate [ROOT] [BUILD_DATE]      Generate a generic project
 run [ROOT] [-p PORT]              Generate and serve a generic project
 deploy [ROOT]                     Generate and deploy a generic project
 render-markdown INPUT             Render one Markdown file
-build CONTENT RESOURCES OUTPUT [BUILD_DATE]
-                                  Build the tanabe1478/blog-compatible site
 ```
 
 Run the CLI without arguments to display its help:

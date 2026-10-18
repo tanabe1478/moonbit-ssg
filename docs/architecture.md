@@ -25,14 +25,14 @@ source.mbt
       ├── markdown.mbt
       │     Ink-compatible HTML conversion
       │
-      ├── content.mbt / publish_content.mbt
-      │     blog-specific / generic Publish content models
+      ├── publish_content.mbt
+      │     generic Publish content model
       │
-      ├── theme.mbt / publish_html.mbt / foundation.mbt
-      │     blog-specific theme / callback HTML factory / Foundation theme
+      ├── publish_html.mbt / foundation.mbt
+      │     callback HTML factory / Foundation theme
       │
-      ├── feed.mbt / publish_feed.mbt / podcast.mbt
-      │     blog-specific and generic RSS, sitemap, podcast feeds
+      ├── build_date.mbt / publish_feed.mbt / podcast.mbt
+      │     build dates, RSS, sitemap, podcast feeds
       │
       ├── output.mbt / publish_files.mbt / project.mbt
       │     filesystem output, resource copying, generic projects
@@ -48,12 +48,9 @@ Pure string/model transformations are kept separate from filesystem I/O. Most be
 
 ## Content models
 
-Two layers coexist intentionally:
+`PublishedContent` and `PublishSiteConfig` expose reusable Publish-like capabilities: multiple sections, pages, nested item paths, custom metadata, media, feeds, factories, and pipelines. New features target this layer.
 
-- `SiteContent` and `SiteConfig` preserve the exact historical output contract of `tanabe1478/blog`.
-- `PublishedContent` and `PublishSiteConfig` expose reusable Publish-like capabilities: multiple sections, pages, nested item paths, custom metadata, media, feeds, factories, and pipelines.
-
-New generic features should target the `PublishedContent` layer. Blog-specific behavior remains isolated so compatibility fixes do not leak into defaults for new sites.
+The library contains no site-specific models. A site with its own output contract, such as `tanabe1478/blog`, keeps its configuration and theme in its own repository and supplies them through `PublishSiteConfig` and a custom `PublishHTMLFactory`, so its quirks do not leak into defaults for new sites.
 
 ## Immutable pipelines
 
@@ -98,4 +95,4 @@ Testing observable public behavior rather than private implementation details al
 
 `cmd/main` handles argument parsing, user-facing errors, and host process execution. Scaffolding, project loading, generation, output synchronization, and rendering live in public library APIs instead of being embedded in CLI branches.
 
-The special low-level `build` command remains an explicit compatibility adapter for `tanabe1478/blog`; new projects use `site.md` and the generic `generate` command.
+The CLI has no site-specific commands. Projects use `site.md` and the generic `generate` command, or call the library from their own MoonBit module.

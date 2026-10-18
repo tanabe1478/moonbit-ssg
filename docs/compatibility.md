@@ -4,11 +4,11 @@
 
 The reference is Swift Publish `0.9.0` at revision `1c8ad00d39c985cb5d497153241a2f1b654e0d40`.
 
-Compatibility is tracked in two layers: the exact migration contract required by `tanabe1478/blog`, and reusable capabilities from the broader Publish framework. Swift source-level API compatibility is not a goal.
+The compatibility boundary is generated output. Reusable capabilities from the Publish framework are tracked below. Swift source-level API compatibility is not a goal.
 
-## tanabe1478/blog migration contract
+## History: tanabe1478/blog migration
 
-Implemented:
+The migration of `tanabe1478/blog` from Swift Publish required:
 
 - Ink-compatible frontmatter
 - Markdown-to-HTML conversion
@@ -23,6 +23,8 @@ Implemented:
 - build timezone offset preservation
 
 Before Swift Publish was removed from the blog repository, 88 generated files were verified byte-for-byte. Representative index, latest post, tag list, migrated post, desktop, and mobile renders were also checked with zero pixel difference. The blog now generates production output with moonbit-ssg only.
+
+The blog-specific adapter that originally reproduced this output has since been removed from the library. The blog now builds through the generic API (`load_published_content`, a custom `PublishHTMLFactory` with `generate_publish_html`, `render_publish_rss_feed`, `render_publish_sitemap`, and the file-copy helpers) from its own repository, and verifies its generated output there. The HTML and `feed.rss` stayed byte-identical; the intended differences are an NFC tag directory name (matching NFC links) and per-item sitemap `lastmod` dates instead of the build date.
 
 ## Reusable Publish capabilities
 
