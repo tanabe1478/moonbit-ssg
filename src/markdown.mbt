@@ -37,7 +37,7 @@ fn render_link(
   } else {
     " title=\"\{escape_attribute(title)}\""
   }
-  "<a href=\"\{escape_attribute(url)}\"\{title_attribute}>\{render_inlines(children, definitions)}</a>"
+  "<a href=\"\{escape_attribute(url)}\"\{title_attribute}>\{render_inlines(children, definitions, in_link=true)}</a>"
 }
 
 ///|
@@ -59,17 +59,24 @@ fn render_image(alt : String, url : String, title : String) -> String {
 fn render_inline(
   inline : @markdown.Inline,
   definitions : Array[@markdown.LinkDefinition],
+  in_link : Bool,
 ) -> String {
   match inline {
-    @markdown.Inline::Text(content~, ..) => escape_html(content)
+    // Bare URLs become links, except inside a link where nesting is invalid.
+    @markdown.Inline::Text(content~, ..) =>
+      if in_link {
+        escape_html(content)
+      } else {
+        render_text_with_autolinks(content)
+      }
     @markdown.Inline::SoftBreak(..) => " "
     @markdown.Inline::HardBreak(..) => "<br>"
     @markdown.Inline::Emphasis(children~, ..) =>
-      "<em>\{render_inlines(children, definitions)}</em>"
+      "<em>\{render_inlines(children, definitions, in_link~)}</em>"
     @markdown.Inline::Strong(children~, ..) =>
-      "<strong>\{render_inlines(children, definitions)}</strong>"
+      "<strong>\{render_inlines(children, definitions, in_link~)}</strong>"
     @markdown.Inline::Strikethrough(children~, ..) =>
-      "<s>\{render_inlines(children, definitions)}</s>"
+      "<s>\{render_inlines(children, definitions, in_link~)}</s>"
     @markdown.Inline::Code(content~, ..) =>
       "<code>\{escape_html(content)}</code>"
     @markdown.Inline::Link(children~, url~, title~, ..) =>
@@ -79,7 +86,7 @@ fn render_inline(
         Some(definition) =>
           render_link(children, definition.url, definition.title, definitions)
         None =>
-          "[\{render_inlines(children, definitions)}][\{escape_html(label)}]"
+          "[\{render_inlines(children, definitions, in_link~)}][\{escape_html(label)}]"
       }
     @markdown.Inline::Autolink(url~, is_email~, ..) => {
       let href = if is_email { "mailto:\{url}" } else { url }
@@ -109,10 +116,11 @@ fn render_inline(
 fn render_inlines(
   inlines : Array[@markdown.Inline],
   definitions : Array[@markdown.LinkDefinition],
+  in_link? : Bool = false,
 ) -> String {
   let rendered : Array[String] = []
   for inline in inlines {
-    rendered.push(render_inline(inline, definitions))
+    rendered.push(render_inline(inline, definitions, in_link))
   }
   rendered.join("")
 }
