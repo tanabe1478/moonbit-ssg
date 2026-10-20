@@ -33,18 +33,30 @@ test "parse Publish item metadata" {
 }
 
 ///|
-test "preserve quoted empty descriptions like Publish" {
+test "unquote quoted metadata values" {
   let document = @ssg.parse_source(
     (
       #|---
       #|date: 2026-04-24 04:09
       #|description: ""
-      #|tags: diary
+      #|title: "Quoted: with colon"
+      #|summary: 'single quoted'
+      #|half: "not closed
       #|---
       #|# ブログを書くためのアプリを作った
     ),
   )
-  inspect(document.item.description, content="\"\"")
+  inspect(document.item.description, content="")
+  debug_inspect(document.metadata.get("description"), content="None")
+  debug_inspect(document.item.title, content="Some(\"Quoted: with colon\")")
+  debug_inspect(
+    document.metadata.get("summary"),
+    content="Some(\"single quoted\")",
+  )
+  debug_inspect(
+    document.metadata.get("half"),
+    content="Some(\"\\\"not closed\")",
+  )
 }
 
 ///|
