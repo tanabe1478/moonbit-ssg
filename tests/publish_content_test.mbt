@@ -152,3 +152,35 @@ test "prefer metadata title, then the first heading, then the filename" {
     content="[\"Explicit title\", \"Heading title\", \"filename-title\"]",
   )
 }
+
+///|
+test "expose frontmatter of the index and pages to themes" {
+  let site = @ssg.build_published_content(
+    (
+      #|---
+      #|profile: Server-side engineer
+      #|---
+      #|# Home
+    ),
+    [],
+    [
+      {
+        path: "about",
+        source: (
+          #|---
+          #|subtitle: About this site
+          #|---
+          #|# About
+        ),
+      },
+    ],
+  )
+  debug_inspect(
+    site.index.metadata.get("profile"),
+    content="Some(\"Server-side engineer\")",
+  )
+  debug_inspect(
+    site.pages[0].content.metadata.get("subtitle"),
+    content="Some(\"About this site\")",
+  )
+}
