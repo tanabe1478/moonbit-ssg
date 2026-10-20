@@ -72,6 +72,8 @@ The parser intentionally follows Ink/Publish behavior rather than implementing g
 
 These details are fixed by black-box tests in `tests/source_test.mbt`.
 
+`parse_source` and `render_markdown` first convert CRLF and lone CR line endings to LF, so Windows-authored or API-fetched sources render exactly like LF sources. Ink's historical behavior of joining CRLF lines is intentionally not reproduced.
+
 ## Ink-compatible Markdown rendering
 
 `src/markdown.mbt` uses `mizchi/markdown` to build an AST, then serializes it with compatibility rules for Ink output.
@@ -82,7 +84,6 @@ A stock CommonMark renderer is not sufficient because Ink differs in areas such 
 - spelling of `<img>`, `<hr>`, and `<br>`
 - image-only paragraphs
 - nested and blank-line-separated lists
-- historical CRLF input
 - YouTube blockquote modifiers and embed query parameters
 - HighlightJS `hljs-*` markup
 

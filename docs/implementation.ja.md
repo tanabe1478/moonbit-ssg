@@ -72,6 +72,8 @@ pub(all) struct SourceDocument {
 
 `tests/source_test.mbt`のblack-box testで挙動を固定しています。
 
+`parse_source`と`render_markdown`は最初にCRLFと単独のCRをLFへ変換します。Windowsで書いたsourceやAPIから取得したsourceも、LFと同じHTMLになります。CRLFの行を連結していたInkの歴史的挙動は意図して再現しません。
+
 ## Ink互換Markdown rendering
 
 `src/markdown.mbt`は`mizchi/markdown`でASTを作り、Ink互換ruleを持つserializerでHTMLへ変換します。
@@ -82,7 +84,6 @@ pub(all) struct SourceDocument {
 - `<img>`、`<hr>`、`<br>`の表記
 - 画像だけの段落
 - nested listと空行で分離されたlist
-- 旧記事のCRLF入力
 - YouTube blockquote modifierとembed query parameter
 - HighlightJSの`hljs-*` markup
 
