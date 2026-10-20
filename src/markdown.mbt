@@ -698,58 +698,6 @@ fn render_blocks(
 }
 
 ///|
-fn is_ascii_whitespace(character : Char) -> Bool {
-  character == ' ' ||
-  character == '\t' ||
-  character == '\r' ||
-  character == '\n'
-}
-
-///|
-fn normalize_ink_line_endings(source : String) -> String {
-  let characters = source.to_array()
-  let output = StringBuilder()
-  let mut index = 0
-  let mut at_structural_line_start = true
-  let mut standalone_image_line = false
-  while index < characters.length() {
-    if characters[index] == '\r' &&
-      index + 1 < characters.length() &&
-      characters[index + 1] == '\n' {
-      index = index + 2
-      while index < characters.length() &&
-            is_ascii_whitespace(characters[index]) {
-        index = index + 1
-      }
-      if standalone_image_line ||
-        (
-          index < characters.length() &&
-          (
-            characters[index] == '#' ||
-            characters[index] == '<' ||
-            characters[index] == '`'
-          )
-        ) {
-        output.write_string("\n\n")
-        at_structural_line_start = true
-      } else {
-        output.write_char(' ')
-        at_structural_line_start = false
-      }
-      standalone_image_line = false
-    } else {
-      if at_structural_line_start && characters[index] == '!' {
-        standalone_image_line = true
-      }
-      output.write_char(characters[index])
-      at_structural_line_start = characters[index] == '\n'
-      index = index + 1
-    }
-  }
-  output.to_string().replace_all(old="\n　\n", new=" ")
-}
-
-///|
 fn inline_plain_text(inline : @markdown.Inline) -> String {
   match inline {
     @markdown.Inline::Text(content~, ..)
@@ -787,7 +735,7 @@ fn inlines_plain_text(inlines : Array[@markdown.Inline]) -> String {
 
 ///|
 fn markdown_title(source : String) -> String? {
-  let document = @markdown.parse(normalize_ink_line_endings(source)).document
+  let document = @markdown.parse(normalize_line_endings(source)).document
   for block in document.children {
     match block {
       @markdown.Block::Heading(level=1, children~, ..) =>
@@ -801,9 +749,6 @@ fn markdown_title(source : String) -> String? {
 ///|
 /// Renders Markdown using Ink-compatible HTML serialization.
 pub fn render_markdown(source : String) -> String {
-  // Ink compares line terminators with a literal LF in a few readers. Keep
-  // that historical behavior while delegating the syntax tree to CommonMark.
-  let compatible_source = normalize_ink_line_endings(source)
-  let document = @markdown.parse(compatible_source).document
+  let document = @markdown.parse(normalize_line_endings(source)).document
   render_blocks(document.children, document.definitions)
 }

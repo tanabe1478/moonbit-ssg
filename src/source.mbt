@@ -109,11 +109,19 @@ fn item_metadata(metadata : Metadata) -> ItemMetadata {
 }
 
 ///|
+/// Converts CRLF and lone CR line endings to LF so sources written on Windows
+/// or fetched from APIs parse exactly like LF sources.
+fn normalize_line_endings(source : String) -> String {
+  source.replace_all(old="\r\n", new="\n").replace_all(old="\r", new="\n")
+}
+
+///|
 /// Parses the metadata syntax used by Ink and Swift Publish.
 ///
 /// Ink ignores leading whitespace before a frontmatter block. A malformed or
 /// unterminated block is treated as ordinary Markdown rather than metadata.
 pub fn parse_source(source : String) -> SourceDocument {
+  let source = normalize_line_endings(source)
   let candidate = source.trim_start().to_owned()
   let lines = candidate.split("\n").map(fn(line) { line.to_owned() }).to_array()
   if lines.is_empty() || lines[0] != "---" {
