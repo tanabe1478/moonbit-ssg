@@ -35,16 +35,7 @@ fn item_with_title(item : @ssg.PublishItem, title : String) -> @ssg.PublishItem 
     relative_path: item.relative_path,
     metadata: item.metadata,
     tags: item.tags,
-    content: {
-      title,
-      description: original.description,
-      body_html: original.body_html,
-      date: original.date,
-      last_modified: original.last_modified,
-      image_path: original.image_path,
-      audio: original.audio,
-      video: original.video,
-    },
+    content: { ..original, title, },
     rss: item.rss,
   }
 }

@@ -196,6 +196,7 @@ pub(all) struct LocationContent {
   image_path : String?
   audio : Audio?
   video : Video?
+  metadata : Metadata
 } derive(Eq, @debug.Debug)
 
 pub(all) struct Metadata {

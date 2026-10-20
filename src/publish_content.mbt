@@ -70,6 +70,8 @@ pub(all) struct LocationContent {
   image_path : String?
   audio : Audio?
   video : Video?
+  /// Raw frontmatter, so themes can read custom keys of the index, sections and pages.
+  metadata : Metadata
 } derive(Eq, Debug)
 
 ///|
@@ -202,6 +204,7 @@ fn location_content(
     image_path: metadata.get("image"),
     audio: parse_audio(metadata),
     video: parse_video(metadata),
+    metadata,
   }
 }
 
@@ -252,6 +255,7 @@ fn empty_location_content(fallback : String) -> LocationContent {
     image_path: None,
     audio: None,
     video: None,
+    metadata: Metadata::empty(),
   }
 }
 
