@@ -83,3 +83,13 @@ test "leave Markdown without valid frontmatter untouched" {
   debug_inspect(document.metadata.entries, content="[]")
   inspect(document.markdown, content="---\nnot closed\n# Heading\n")
 }
+
+///|
+test "parse frontmatter written with CRLF line endings" {
+  let document = @ssg.parse_source(
+    "---\r\ntitle: Windows title\r\ndate: 2024-01-02 03:04\r\n---\r\n# Heading\r\n",
+  )
+  inspect(document.metadata.get("title").unwrap_or(""), content="Windows title")
+  inspect(document.item.date.unwrap_or(""), content="2024-01-02 03:04")
+  inspect(document.markdown.contains("\r"), content="false")
+}

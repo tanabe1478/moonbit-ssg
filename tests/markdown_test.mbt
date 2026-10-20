@@ -22,11 +22,15 @@ test "render common Markdown with Ink HTML shape" {
 }
 
 ///|
-test "preserve Ink behavior at CRLF boundaries" {
-  let source = "# Title\n\n## Section\r\n\r\nBody\r\n\r\n- Item"
+test "treat CRLF and CR line endings like LF" {
+  let expected = "<h1>Title</h1><h2>Section</h2><p>Body</p><ul><li>Item</li></ul>"
   inspect(
-    @ssg.render_markdown(source),
-    content="<h1>Title</h1><h2>Section Body - Item</h2>",
+    @ssg.render_markdown("# Title\n\n## Section\r\n\r\nBody\r\n\r\n- Item"),
+    content=expected,
+  )
+  inspect(
+    @ssg.render_markdown("# Title\r\r## Section\r\rBody\r\r- Item"),
+    content=expected,
   )
 }
 
