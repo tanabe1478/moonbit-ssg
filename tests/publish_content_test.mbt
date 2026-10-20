@@ -56,7 +56,7 @@ test "build generic Publish sections pages and metadata" {
   inspect(item.content.last_modified, content="2025-02-04 05:06")
   inspect(item.rss.guid.unwrap(), content="stable-id")
   inspect(item.rss.link.unwrap(), content="https://example.com/custom")
-  inspect(item.rss_title(), content="\"[News] \"Custom item\"!\"")
+  inspect(item.rss_title(), content="[News] Custom item!")
   debug_inspect(
     item.content.audio,
     content=(

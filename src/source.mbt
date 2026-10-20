@@ -55,6 +55,20 @@ fn set_entry(
 }
 
 ///|
+/// Strips one pair of matching surrounding quotes, as YAML scalars do.
+fn unquote(value : String) -> String {
+  if value.length() >= 2 &&
+    (
+      (value.has_prefix("\"") && value.has_suffix("\"")) ||
+      (value.has_prefix("'") && value.has_suffix("'"))
+    ) {
+    value[1:value.length() - 1].to_owned()
+  } else {
+    value
+  }
+}
+
+///|
 fn parse_metadata_lines(lines : Array[String]) -> Metadata {
   let entries : Array[(String, String)] = []
   let mut last_entry : Int? = None
@@ -66,7 +80,7 @@ fn parse_metadata_lines(lines : Array[String]) -> Metadata {
     match trimmed.split_once(":") {
       Some((raw_key, raw_value)) => {
         let key = raw_key.trim().to_owned()
-        let value = raw_value.trim().to_owned()
+        let value = unquote(raw_value.trim().to_owned())
         if !value.is_empty() {
           last_entry = Some(set_entry(entries, key, value))
         }
