@@ -130,3 +130,43 @@ test "apply HighlightJS-compatible shell and Swift markup" {
     ),
   )
 }
+
+///|
+test "link bare http, https and www URLs" {
+  inspect(
+    @ssg.render_markdown("See https://example.com/path and www.example.com now"),
+    content="<p>See <a href=\"https://example.com/path\">https://example.com/path</a> and <a href=\"http://www.example.com\">www.example.com</a> now</p>",
+  )
+}
+
+///|
+test "leave trailing punctuation and unbalanced parentheses out of bare URLs" {
+  inspect(
+    @ssg.render_markdown(
+      "Visit https://example.com/a?b=1. Or (https://example.com/wiki/A_(b)).",
+    ),
+    content="<p>Visit <a href=\"https://example.com/a?b=1\">https://example.com/a?b=1</a>. Or (<a href=\"https://example.com/wiki/A_(b)\">https://example.com/wiki/A_(b)</a>).</p>",
+  )
+  inspect(
+    @ssg.render_markdown("- https://www.synology.com/ja-jp/compatibility?"),
+    content="<ul><li><a href=\"https://www.synology.com/ja-jp/compatibility\">https://www.synology.com/ja-jp/compatibility</a>?</li></ul>",
+  )
+}
+
+///|
+test "end bare URLs at Japanese text and allow Japanese before them" {
+  inspect(
+    @ssg.render_markdown("詳しくはhttps://example.com/docsを参照"),
+    content="<p>詳しくは<a href=\"https://example.com/docs\">https://example.com/docs</a>を参照</p>",
+  )
+}
+
+///|
+test "do not autolink inside links, code, or words" {
+  inspect(
+    @ssg.render_markdown(
+      "[https://example.com](https://example.com) `https://example.com` xhttps://example.com",
+    ),
+    content="<p><a href=\"https://example.com\">https://example.com</a> <code>https://example.com</code> xhttps://example.com</p>",
+  )
+}
