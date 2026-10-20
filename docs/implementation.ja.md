@@ -87,6 +87,8 @@ pub(all) struct SourceDocument {
 - YouTube blockquote modifierとembed query parameter
 - HighlightJSの`hljs-*` markup
 
+本文中の`http://`、`https://`、`www.`で始まるURLは、GFMのextended autolinkと同じようにlinkにします（`src/autolink.mbt`）。domainが有効であることを確認し、末尾の句読点・対応しない`)`・末尾の`&name;`はURLに含めません。日本語の文章向けに、URLはASCII以外の文字で終わり、直前がASCII以外の文字でもlinkにします。linkの中とcode spanはlinkにしません。
+
 AST variantを`match`で分岐します。
 
 ```moonbit

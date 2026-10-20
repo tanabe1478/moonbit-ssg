@@ -87,6 +87,8 @@ A stock CommonMark renderer is not sufficient because Ink differs in areas such 
 - YouTube blockquote modifiers and embed query parameters
 - HighlightJS `hljs-*` markup
 
+Bare `http://`, `https://` and `www.` URLs in text are linked like GFM extended autolinks (`src/autolink.mbt`): the domain must be valid, and trailing punctuation, an unbalanced `)` and a trailing `&name;` are left out. For Japanese prose, a URL also ends at the first non-ASCII character and may start right after one. Text inside links and code spans is not autolinked.
+
 Rendering dispatches over AST variants:
 
 ```moonbit
