@@ -68,6 +68,7 @@ The parser intentionally follows Ink/Publish behavior rather than implementing g
 - ignored empty metadata values
 - lines without `:` appended to the previous value
 - last duplicate key wins
+- a value wrapped in matching `"` or `'` quotes is unquoted; an empty result counts as no value
 - unterminated frontmatter remains ordinary Markdown
 
 These details are fixed by black-box tests in `tests/source_test.mbt`.

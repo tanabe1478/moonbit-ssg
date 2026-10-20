@@ -67,7 +67,7 @@ pub(all) struct SourceDocument {
 - comma区切りtag
 - 空metadata valueを無視
 - `:`がない行を直前valueへ連結
-- 重複keyは最後を採用
+- 前後が同じ引用符（`"`または`'`）の値は引用符を外し、空になったら値なしとして扱う
 - 閉じられていないfrontmatterは通常Markdownとして保持
 
 `tests/source_test.mbt`のblack-box testで挙動を固定しています。
